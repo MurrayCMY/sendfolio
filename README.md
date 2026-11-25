@@ -1,54 +1,101 @@
-<div align="center">
-
-# SendFolio
-
-**Share documents. See who reads them, page by page.**
-A free, self-hosted, open-source alternative to DocSend, built for founders.
-
-[![CI](https://github.com/MurrayCmy/sendfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/MurrayCmy/sendfolio/actions/workflows/ci.yml)
-[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[English](README.md) · [简体中文](README.zh-CN.md)
-
-</div>
-
-You are raising money, selling to enterprises, or running a data room. You send a deck as a PDF and then... nothing.
-Did they open it? Which pages did they read? Did they forward it?
-
-SendFolio gives each recipient their own link, asks them to verify their email, optionally has them sign an NDA, shows the
-document in the browser with their name watermarked on every page, and tells you exactly how long they spent on each page.
-You run it yourself, on your own domain, and your documents and your readers' data stay with you.
+<p align="center">
+  <img src="docs/images/banner.svg" alt="SendFolio: see who reads your documents, page by page" width="100%">
+</p>
 
 <p align="center">
-  <img src="docs/images/overview.png" alt="Admin overview" width="860">
+  <b>The free, self-hosted DocSend alternative for founders.</b><br>
+  Send one link per person. Know who opened it, which pages they read, and for how long.
 </p>
+
+<p align="center">
+  <a href="https://github.com/MurrayCmy/sendfolio/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MurrayCmy/sendfolio/ci.yml?branch=main&style=flat-square&label=CI&labelColor=1a213d"></a>
+  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-3949ab?style=flat-square&labelColor=1a213d"></a>
+  <img alt="Node 22+" src="https://img.shields.io/badge/node-22%2B-3949ab?style=flat-square&labelColor=1a213d">
+  <img alt="Docker ready" src="https://img.shields.io/badge/docker-ready-3949ab?style=flat-square&labelColor=1a213d">
+  <img alt="English and Chinese" src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-3949ab?style=flat-square&labelColor=1a213d">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-3949ab?style=flat-square&labelColor=1a213d"></a>
+</p>
+
+<p align="center">
+  <a href="#-try-it-in-two-minutes">Quick start</a> ·
+  <a href="#-deploy-it-for-real">Deploy</a> ·
+  <a href="#-features">Features</a> ·
+  <a href="#-let-an-ai-agent-do-it">AI agents</a> ·
+  <a href="docs/configuration.md">Docs</a> ·
+  <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="docs/images/overview.png" alt="SendFolio admin overview" width="900">
+</p>
+
+## Why SendFolio
+
+You are raising money, selling to enterprises or running a data room. You email a deck as a PDF, and then… silence.
+Did they open it? Which slides held their attention? Did they forward it to someone else?
+
+SendFolio gives each recipient **their own link**, asks them to **verify their email**, can have them **sign your NDA**, shows the
+document in the browser with **their name watermarked on every page**, and tells you **how long they spent on each one**.
+
+|  | Hosted document-sharing services | **SendFolio** |
+|---|---|---|
+| Cost | Per-seat subscription | **Free**, you only pay for a small server |
+| Your documents and readers' data | On their servers | **On yours** |
+| Name, domain, colours, language | Theirs | **Yours** (`docs.yourcompany.com`) |
+| Source code | Closed | **Apache 2.0** |
+
+## ✨ Features
 
 <table>
   <tr>
-    <td><img src="docs/images/reader.png" alt="What a recipient sees: the page with their name watermarked"></td>
-    <td><img src="docs/images/analytics.png" alt="Per-page reading heat map"></td>
+    <td width="33%" valign="top">
+      <h4>🔗 A link per person</h4>
+      Custom addresses like <code>/acme</code>, expiry dates, passwords. Disable or delete a link any time.
+    </td>
+    <td width="33%" valign="top">
+      <h4>📊 Page-by-page analytics</h4>
+      Time on every page, how far they got, a heat map across all readers, return visits and a live “reading now” marker.
+    </td>
+    <td width="33%" valign="top">
+      <h4>📬 Follow-up inbox</h4>
+      See who came back or read deeply, set a status (contacted, meeting, declined) and keep private notes.
+    </td>
   </tr>
   <tr>
-    <td align="center"><sub>What the recipient sees: the page, with their name watermarked</sub></td>
-    <td align="center"><sub>Per-page reading time across all readers</sub></td>
+    <td valign="top">
+      <h4>✉️ Verified access</h4>
+      Name + work email + a 6-digit code. Block personal domains or allow only specific companies.
+    </td>
+    <td valign="top">
+      <h4>📝 NDA with e-signature</h4>
+      Readers accept your NDA first. Each acceptance becomes a PDF with time, IP and a hash of the exact text, emailed to the signer.
+    </td>
+    <td valign="top">
+      <h4>💧 Dynamic watermark</h4>
+      Name, email, IP and time burned into every page (and downloaded PDFs). You choose the fields.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top">
+      <h4>🖼️ Images, not PDFs</h4>
+      Pages are served as images with a tamper guard. Optional watermarked PDF download.
+    </td>
+    <td valign="top">
+      <h4>🔔 Notifications</h4>
+      An email when someone opens a link, and a reading summary with their top pages when they finish.
+    </td>
+    <td valign="top">
+      <h4>🌍 English &amp; 简体中文</h4>
+      Admin, reader, emails and PDFs in both languages. Adding another is one file.
+    </td>
   </tr>
 </table>
 
-## Features
+## 🚀 Try it in two minutes
 
-- **A personal link per recipient**, with a custom address (`yourdomain.com/acme`), an optional expiry date and an optional password. Disable or delete a link at any time.
-- **Reading analytics**: time on every page, how far they got, a heat map across all readers, return visits, device and location, and a live "reading now" marker.
-- **Follow-up inbox**: see who came back or read deeply, set a follow-up status and keep private notes per person.
-- **Email-verified access**: visitors enter their name and work email and confirm a 6-digit code. Block personal email domains or allow only specific company domains.
-- **NDA gate with e-signature**: visitors accept your NDA before they see anything. Each acceptance produces a PDF (agreement plus a signing record with time, IP and a hash of the exact text) and emails a copy to the signer.
-- **Dynamic watermark** with the viewer's name, email, IP and time, baked into the page image (and into downloaded PDFs). You choose which fields appear.
-- **Pages are served as images**, not as the PDF, with a tamper guard. Optional watermarked PDF download.
-- **Notifications**: an email when someone opens a link and a reading summary when they finish.
-- **Two languages**: English and 简体中文, for the admin, the reader, emails and PDFs. Easy to add more.
-- **Runs anywhere**: Docker, a VPS, Netlify, or `npm start` on your laptop. No vendor lock-in.
-
-## Try it in two minutes
-
-You need Node.js 22 or newer.
+You need **Node.js 22+**. No database to install: the quick start uses an embedded one.
 
 ```bash
 git clone https://github.com/MurrayCmy/sendfolio.git
@@ -56,75 +103,133 @@ cd sendfolio
 npm install
 npm run init -- --admin-email you@example.com   # creates .env with a fresh secret
 npm run build
-npm run demo      # optional: fills in made-up sample data so there is something to look at
+npm run demo     # optional: made-up sample data, so there is something to look at
 npm start
 ```
 
-Open <http://localhost:8787/admin>. The sign-in code is printed in the terminal (email is not configured yet).
-The demo data includes a sample link at <http://localhost:8787/acme>.
+Open **<http://localhost:8787/admin>** and sign in. Email is not configured yet, so the 6-digit code is printed in your terminal.
+The demo data includes a sample reader link at <http://localhost:8787/acme>.
 
-This uses an embedded database and local files, which is perfect for trying things out. For real use, pick one of the options below.
+> [!TIP]
+> This mode is for trying things out. For real use, deploy with Docker or Netlify below.
 
-## Deploy it for real
+## 🌍 Deploy it for real
 
-| Option | Best for | Database | Files | Guide |
+You need a domain (or subdomain), an SMTP account to send email (Resend, Gmail, Postmark, SES… anything SMTP) and about ten minutes.
+
+| | Best for | Database | Files | Guide |
 |---|---|---|---|---|
-| **Docker Compose** | Any VPS or home server. Recommended. | PostgreSQL (included) | Docker volume | [docs/deploy-docker.md](docs/deploy-docker.md) |
-| **Netlify** | No server to look after | Netlify Database or any Postgres | Netlify Blobs | [docs/deploy-netlify.md](docs/deploy-netlify.md) |
-| **Railway, Render, Fly.io, ...** | Managed container hosting | Their managed Postgres | A mounted volume | [docs/deploy-paas.md](docs/deploy-paas.md) |
-| **Plain Node.js** (`npm start`) | Laptops, tiny servers | Embedded PGlite or Postgres | Local folder | this page |
+| 🐳 **Docker Compose** <br><sub>recommended</sub> | Any VPS or home server | PostgreSQL (included) | Docker volume | [Deploy with Docker →](docs/deploy-docker.md) |
+| ▲ **Netlify** | No server to look after | Netlify Database or any Postgres | Netlify Blobs | [Deploy on Netlify →](docs/deploy-netlify.md) |
+| 🚂 **Railway · Render · Fly.io** | Managed containers | Their Postgres | Mounted volume | [Container platforms →](docs/deploy-paas.md) |
+| 💻 **Plain Node.js** | Laptops, tiny servers | Embedded or Postgres | Local folder | [Quick start](#-try-it-in-two-minutes) |
 
-Whichever you choose, you need: a domain (or subdomain), an SMTP account for sending email (Resend, Gmail, Postmark, SES ... anything
-SMTP), and ten minutes.
+<details>
+<summary><b>Docker Compose in four commands</b></summary>
 
-### Let an AI agent do it
+```bash
+git clone https://github.com/MurrayCmy/sendfolio.git && cd sendfolio
+cp .env.example .env          # set SESSION_SECRET, ADMIN_EMAIL, SITE_URL, SMTP_*, DOMAIN
+docker compose --profile https up -d --build
+curl -fsS https://docs.yourcompany.com/healthz
+```
+Automatic HTTPS (Caddy) and PostgreSQL are included. Full guide: [docs/deploy-docker.md](docs/deploy-docker.md).
+</details>
 
-SendFolio is built to be deployed by coding agents (Claude Code, Codex, Gemini CLI, Grok, Antigravity, Cursor ...). Open the folder in your agent
-and paste:
+## 🤖 Let an AI agent do it
 
-> Deploy SendFolio from this repository to **\[Docker on my VPS / Netlify / Railway]**. Follow `AGENTS.md`. Ask me for anything
-> you cannot find out yourself (admin email, domain, SMTP credentials). When finished, run `npm run doctor` and `npm test`
-> and tell me the admin URL.
+SendFolio is built to be deployed by coding agents: **Claude Code, Codex, Gemini CLI, Grok, Antigravity, Cursor**…
+Open the repository in your agent and paste:
 
-[`AGENTS.md`](AGENTS.md) contains the step-by-step runbook for every target, what to ask you, and how to verify the result.
+```text
+Deploy SendFolio from this repository to [Docker on my VPS | Netlify | Railway].
+Follow AGENTS.md. Ask me for anything you cannot find out yourself
+(admin email, domain, SMTP credentials). When finished, run `npm run doctor`
+and `npm test`, and tell me the admin URL.
+```
+
+[`AGENTS.md`](AGENTS.md) holds the step-by-step runbook for every target, the questions to ask you, and how to verify the result.
 `npm run doctor -- --json` gives an agent a machine-readable health check.
 
-## Configuration
+## 📸 Screenshots
 
-Everything is configured with environment variables; [`.env.example`](.env.example) documents each one.
-The important ones: `ADMIN_EMAIL`, `SITE_URL`, `SESSION_SECRET`, `SMTP_*`, `APP_NAME`, `DEFAULT_LOCALE` (`en` or `zh`), `TIMEZONE`.
-See [docs/configuration.md](docs/configuration.md), and [docs/customization.md](docs/customization.md) for your own name, colours,
-logo, NDA text and languages.
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/reader.png" alt="Reader with a personal watermark"><br><sub><b>What the recipient sees</b>: the page, watermarked with their name</sub></td>
+    <td width="50%"><img src="docs/images/analytics.png" alt="Per-page heat map"><br><sub><b>Where attention goes</b>: time per page across all readers</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/visitor.png" alt="A visitor's profile with status and notes"><br><sub><b>Follow up</b>: every visit, status and private notes per person</sub></td>
+    <td><img src="docs/images/links.png" alt="Links per recipient"><br><sub><b>One link per recipient</b>, with custom addresses</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/overview-zh.png" alt="管理后台（简体中文）"><br><sub><b>中文界面</b>: the whole product is available in Chinese</sub></td>
+    <td align="center"><img src="docs/images/reader-mobile.png" alt="Reader on a phone" width="260"><br><sub><b>Works on phones</b></sub></td>
+  </tr>
+</table>
 
-## How it works
+## 🔍 How it works
 
+```mermaid
+flowchart LR
+    A["You upload a PDF<br/>(rendered to images in your browser)"] --> B["Create one link<br/>per recipient"]
+    B --> C["Recipient opens it:<br/>email code → NDA → reader"]
+    C --> D["Reader draws page + watermark,<br/>sends a 5-second heartbeat"]
+    D --> E["You see time per page,<br/>reach, return visits"]
+    D --> F["Email summary<br/>when they finish"]
 ```
- Browser (Preact)  ──►  Node server / Netlify Functions  ──►  PostgreSQL (or embedded PGlite)
- admin + reader          admin API · visitor API · job         visits, page views, NDAs ...
-                                   │
-                                   └──►  File storage (disk volume or Netlify Blobs): page images, signed PDFs
-```
 
-- Uploading happens in your browser: it renders each PDF page to an image and uploads those, so readers only ever receive images.
-- The reader draws the page image and the watermark on one canvas. Time is counted with a 5-second heartbeat that only
-  advances while the page is visible, focused and in use.
-- A background job (every 10 minutes) sends reading summaries and retries failed NDA emails.
+- **Uploads happen in your browser.** It renders each PDF page to an image and uploads those, so readers only ever receive images.
+- **Time is counted honestly.** A heartbeat only advances while the page is visible, the window is focused and the reader is active.
+- **One code base, three runtimes**: a Node server (Docker, `npm start`) or Netlify Functions, on PostgreSQL or embedded PGlite.
 
 More in [docs/architecture.md](docs/architecture.md).
 
-## Privacy and security
+## ⚙️ Configuration
+
+Everything is an environment variable; [`.env.example`](.env.example) documents each one.
+
+<details>
+<summary><b>The ones you will touch</b></summary>
+
+| Variable | What it does |
+|---|---|
+| `ADMIN_EMAIL` | The only address that can sign in to `/admin` |
+| `SITE_URL` | Your public address, e.g. `https://docs.yourcompany.com` |
+| `SESSION_SECRET` | 32+ random characters (`npm run init` creates it) |
+| `SMTP_HOST` `SMTP_USER` `SMTP_PASS` `MAIL_FROM` | Sending email |
+| `APP_NAME` `COMPANY_NAME` | Your name in the UI, emails and NDA |
+| `DEFAULT_LOCALE` | `en` or `zh` |
+| `TIMEZONE` | e.g. `UTC`, `America/New_York`, `Asia/Shanghai` |
+| `DATABASE_URL` | PostgreSQL. Empty = embedded database |
+
+Full reference: [docs/configuration.md](docs/configuration.md) · Make it yours (name, colours, logo, NDA, new languages): [docs/customization.md](docs/customization.md)
+</details>
+
+## 🔒 Privacy and security
 
 - Recipients are told what is recorded: name, email, time, IP address, device and time per page.
-- Sessions use signed, HttpOnly cookies; login codes are rate limited; the admin area accepts a single email address.
-- Read [SECURITY.md](SECURITY.md) for the threat model, limits (a watermark deters leaks, it cannot stop a photo of a screen) and how to report a vulnerability.
-- **The included NDA is a sample template, not legal advice.** Have a lawyer approve the text you actually use.
+- Signed HttpOnly cookies, rate-limited login codes, one admin address, no third-party scripts or fonts.
+- A watermark deters leaks and lets you trace them; **it cannot stop someone photographing a screen**. Details in [SECURITY.md](SECURITY.md).
 
-## Status
+> [!IMPORTANT]
+> The included NDA is a **sample template, not legal advice**. Have a lawyer approve the text you actually use.
 
-SendFolio is young (v0.1). It is used in production by its authors, and the deployment paths marked "Recommended" are tested in CI.
-Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
+## 🗺️ Status and roadmap
 
-## License
+SendFolio is young (**v0.1**). Docker Compose, plain Node and PostgreSQL are tested in CI on every commit.
 
-[Apache License 2.0](LICENSE). The name and logo are covered by [TRADEMARKS.md](TRADEMARKS.md).
-Third-party notices are in [NOTICE](NOTICE).
+- [x] Docker, Netlify and plain Node deployment · English and Chinese · NDA e-signature · watermarks · follow-up notes
+- [ ] S3-compatible file storage (for multi-replica and managed platforms)
+- [ ] Team members and roles
+- [ ] Data rooms: several documents per link
+- [ ] Webhooks and a Slack / Lark notification option
+- [ ] More languages
+
+Ideas and pull requests are welcome: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📄 License
+
+[Apache License 2.0](LICENSE). The name and logo are covered by [TRADEMARKS.md](TRADEMARKS.md); third-party notices are in [NOTICE](NOTICE).
+
+<p align="center"><sub>Built for founders who would rather spend their time on the company than on the paperwork around it.</sub></p>

@@ -207,6 +207,7 @@ button.pageno:hover { border-color: var(--line); background: var(--bg); }
 .jumpgrid button.on { background: var(--primary); color: #fff; border-color: var(--primary); }
 .toast { position: absolute; left: 50%; bottom: calc(56px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30; display: flex; gap: 14px; align-items: center; background: var(--dark); color: #fff; padding: 10px 16px; border-radius: 6px; font-size: 14px; max-width: calc(100% - 24px); box-shadow: 0 6px 24px rgba(26,33,61,.3); }
 .toast .link { color: var(--light); padding: 2px 4px; white-space: nowrap; }
+.toast { width: max-content; } .toast span { flex: 1 1 auto; min-width: 0; }
 .rcolumn { overscroll-behavior: contain; }
 .mpage .pwrap { display: block; height: auto; }
 .mpage .pcanvas { width: 100%; height: auto; max-height: none; box-shadow: none; }
