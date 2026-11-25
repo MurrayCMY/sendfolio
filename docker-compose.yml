@@ -1,0 +1,56 @@
+# SendFolio with PostgreSQL.   docker compose up -d
+# 1) cp .env.example .env  and fill in SESSION_SECRET, ADMIN_EMAIL, SITE_URL (+ SMTP_* to send real email)
+#    (or: docker run --rm -v "$PWD":/w -w /w node:22-alpine node scripts/init.mjs --admin-email you@example.com --site-url https://docs.example.com --yes)
+# 2) docker compose up -d                       -> http://localhost:8787
+#    docker compose --profile https up -d       -> automatic HTTPS for the domain in DOMAIN (see Caddyfile)
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sendfolio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sendfolio}
+      POSTGRES_DB: sendfolio
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sendfolio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://sendfolio:${POSTGRES_PASSWORD:-sendfolio}@db:5432/sendfolio
+      TRUST_PROXY: "true"
+    ports:
+      - "${BIND:-127.0.0.1}:${PORT:-8787}:8787"
+    volumes:
+      - app-data:/app/data
+
+  # Optional HTTPS in front of the app (docker compose --profile https up -d). Needs DOMAIN set and DNS pointing here.
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+volumes:
+  db-data:
+  app-data:
+  caddy-data:

@@ -1,0 +1,153 @@
+import { appConfig, useLang as useGlobalLang } from "../i18n";
+import type { Lang } from "../i18n";
+
+export type { Lang };
+
+const dict = {
+  zh: {
+    title: "查看保密文件",
+    intro: (t: string) => `${appConfig.appName} 与您分享了《${t}》。请填写您的信息，我们会向您的邮箱发送验证码。`,
+    introPlain: (t: string) => `${appConfig.appName} 与您分享了《${t}》。`,
+    name: "姓名",
+    email: "工作邮箱",
+    password: "访问密码",
+    send: "发送验证码",
+    view: "查看文件",
+    code: "6 位验证码",
+    codeSent: (e: string) => `验证码已发送至 ${e}，10 分钟内有效。`,
+    verify: "验证",
+    resend: "重新发送",
+    codeHint: "没收到？请先看看垃圾邮件夹，邮件通常在一分钟内送达。仍没有的话，可以返回检查邮箱是否填写正确。",
+    ndaScroll: "请阅读到协议末尾，然后勾选同意。",
+    ndaScrolled: "已阅读到末尾。",
+    resendIn: (s: number) => `${s} 秒后可重新发送`,
+    back: "返回修改",
+    privacy: () => `为保护保密信息，我们会记录您的姓名、邮箱、访问时间、IP 地址、设备信息，以及每页的阅读时长。这些信息仅供 ${appConfig.appName} 的运营方使用，不会提供给第三方。`,
+    ndaTitle: "保密协议",
+    ndaIntro: "查看文件前，请阅读并同意以下保密协议。",
+    agree: "我已阅读并同意上述保密协议，并同意以电子方式签署。",
+    accept: "同意并查看文件",
+    confidential: (n: string | null) => (n ? `保密文件 · 仅供 ${n} 查看` : "保密文件"),
+    download: "下载 PDF",
+    prev: "上一页",
+    next: "下一页",
+    thumbs: "缩略图",
+    allPages: "全部页面",
+    pagesN: (n: number) => `${n} 页`,
+    fullscreen: "全屏",
+    exitFullscreen: "退出全屏",
+    close: "关闭",
+    pageLabel: (n: number, total: number) => `第 ${n} 页，共 ${total} 页`,
+    zoomIn: "放大",
+    zoomOut: "还原大小",
+    jump: "跳转到页码",
+    jumpGo: "跳转",
+    jumpInput: "页码",
+    resume: (n: number) => `已回到上次读到的第 ${n} 页`,
+    restart: "从第 1 页开始",
+    retry: "加载失败，点击重试",
+    opening: "正在打开文件…",
+    openingHint: "首次打开可能需要几秒钟",
+    keysHint: "← → 翻页　点击图片放大",
+    dlWechat: "如需下载，请在浏览器中打开",
+    loading: "加载中…",
+    working: "处理中…",
+    errPersonal: "请使用工作邮箱。如果您只有个人邮箱，请联系向您发送链接的人。",
+    errDomain: "该邮箱域名不在允许范围内。请使用受邀的工作邮箱，或联系向您发送链接的人。",
+    errInvalid: "请填写姓名和正确的邮箱。",
+    errPassword: "访问密码不正确。",
+    errCode: "验证码不正确或已过期。",
+    errExpired: "验证已过期，请重新开始。",
+    errRate: "发送或尝试次数过多，请约 1 小时后再试；如有急用，请联系向您发送链接的人。",
+    errGeneric: "出错了，请稍后再试。",
+    tamperTitle: "页面显示异常",
+    tamperBody: "检测到保密水印被修改或移除，文件已隐藏。请刷新页面后继续阅读。",
+    reload: "刷新页面",
+    invalidTitle: "这个链接暂时无法打开",
+    invalidBody: "可能是链接已过期、被停用，或地址输入有误。请联系向您发送链接的人，获取新的链接。",
+  },
+  en: {
+    title: "View confidential document",
+    intro: (t: string) => `${appConfig.appName} has shared "${t}" with you. Please enter your details and we will email you a verification code.`,
+    introPlain: (t: string) => `${appConfig.appName} has shared "${t}" with you.`,
+    name: "Name",
+    email: "Work email",
+    password: "Access password",
+    send: "Send code",
+    view: "View document",
+    code: "6-digit code",
+    codeSent: (e: string) => `A code was sent to ${e}. It expires in 10 minutes.`,
+    verify: "Verify",
+    resend: "Resend",
+    codeHint: "Not received? Check your spam folder first; it usually arrives within a minute. If it still does not, go back and check the email address.",
+    ndaScroll: "Please read to the end of the agreement, then tick the box.",
+    ndaScrolled: "You have reached the end.",
+    resendIn: (s: number) => `Resend in ${s}s`,
+    back: "Go back",
+    privacy: () => `To protect confidential information, we record your name, email, access time, IP address, device information and time spent on each page. This information is used only by the operator of ${appConfig.appName} and is not shared with third parties.`,
+    ndaTitle: "Non-Disclosure Agreement",
+    ndaIntro: "Please read and accept the following agreement before viewing the document.",
+    agree: "I have read and agree to the NDA above and consent to sign electronically.",
+    accept: "Agree and view document",
+    confidential: (n: string | null) => (n ? `Confidential · for ${n} only` : "Confidential"),
+    download: "Download PDF",
+    prev: "Previous page",
+    next: "Next page",
+    thumbs: "Thumbnails",
+    allPages: "All pages",
+    pagesN: (n: number) => `${n} pages`,
+    fullscreen: "Full screen",
+    exitFullscreen: "Exit full screen",
+    close: "Close",
+    pageLabel: (n: number, total: number) => `Page ${n} of ${total}`,
+    zoomIn: "Zoom in",
+    zoomOut: "Reset zoom",
+    jump: "Jump to page",
+    jumpGo: "Go",
+    jumpInput: "Page number",
+    resume: (n: number) => `Back at page ${n}, where you left off`,
+    restart: "Start from page 1",
+    retry: "Failed to load. Tap to retry",
+    opening: "Opening the document…",
+    openingHint: "The first load can take a few seconds",
+    keysHint: "← → to turn pages · click to zoom",
+    dlWechat: "To download, open this link in a browser",
+    loading: "Loading…",
+    working: "Working…",
+    errPersonal: "Please use your work email. If you only have a personal email, please contact the person who shared this link.",
+    errDomain: "This email domain is not allowed. Please use the invited work email, or contact the person who shared this link.",
+    errInvalid: "Please enter your name and a valid email.",
+    errPassword: "Incorrect access password.",
+    errCode: "The code is incorrect or has expired.",
+    errExpired: "Verification expired. Please start again.",
+    errRate: "Too many attempts. Please try again in about an hour, or contact the person who shared this link.",
+    errGeneric: "Something went wrong. Please try again later.",
+    tamperTitle: "Display error",
+    tamperBody: "The confidentiality watermark was modified or removed, so the document has been hidden. Please reload the page to continue.",
+    reload: "Reload",
+    invalidTitle: "This link is not available",
+    invalidBody: "It may have expired, been switched off, or been mistyped. Please contact the person who shared it for a new link.",
+  },
+} as const;
+
+export type Dict = (typeof dict)["zh"];
+
+/** Language state is shared with the rest of the app (src/i18n.ts); this adds the visitor dictionary. */
+export function useLang(): [Lang, (l: Lang) => void, Dict] {
+  const [lang, setLang] = useGlobalLang();
+  return [lang, setLang, dict[lang] as Dict];
+}
+
+export function errorText(t: Dict, code?: string): string {
+  switch (code) {
+    case "personal_email": return t.errPersonal;
+    case "domain_not_allowed": return t.errDomain;
+    case "invalid": return t.errInvalid;
+    case "bad_password": return t.errPassword;
+    case "bad_code": return t.errCode;
+    case "expired": return t.errExpired;
+    case "rate":
+    case "wait": return t.errRate;
+    default: return t.errGeneric;
+  }
+}

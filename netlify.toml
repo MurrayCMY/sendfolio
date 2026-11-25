@@ -1,0 +1,36 @@
+# Netlify deployment target. See docs/deploy-netlify.md.
+# The same code also runs as a plain Node server (Docker / VPS); this file only matters on Netlify.
+
+[build]
+  command = "npm run build:web"
+  publish = "dist"
+
+[functions]
+  node_bundler = "esbuild"
+
+# SPA fallback: admin and visitor routes are client-side. API paths are served by functions (config.path) first.
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/v/*"
+  to = "/index.html"
+  status = 200
+
+# Custom link addresses such as /acme. Single segment only, so assets and API paths are unaffected.
+[[redirects]]
+  from = "/:slug"
+  to = "/index.html"
+  status = 200
+
+# Static-asset headers only. Function responses set their own headers in code.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"

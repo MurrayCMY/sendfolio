@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  SESSION_SECRET: ci-session-secret-ci-session-secret-ci-session
+  ADMIN_EMAIL: admin@example.test
+  SITE_URL: http://localhost:8787
+
+jobs:
+  checks:
+    name: Typecheck, i18n, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run i18n:check
+      - run: npm run build
+
+  smoke-pglite:
+    name: End-to-end (embedded PGlite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Start server
+        run: |
+          node dist-server/index.mjs > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS localhost:8787/healthz && break; sleep 1; done
+      - run: node scripts/smoke-test.mjs --log server.log
+      - name: Server log
+        if: failure()
+        run: cat server.log
+
+  smoke-postgres:
+    name: End-to-end (PostgreSQL)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Start server
+        run: |
+          node dist-server/index.mjs > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -fsS localhost:8787/healthz && break; sleep 1; done
+      - run: node scripts/smoke-test.mjs --log server.log
+      - name: Server log
+        if: failure()
+        run: cat server.log
+
+  docker:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Create .env
+        run: node scripts/init.mjs --admin-email "$ADMIN_EMAIL" --site-url "$SITE_URL" --yes
+      - name: Start the stack
+        run: |
+          docker compose up -d --build
+          docker compose logs -f app > server.log 2>&1 &
+          for i in $(seq 1 90); do curl -fsS localhost:8787/healthz && break; sleep 2; done
+      - name: Smoke test against the container
+        run: node scripts/smoke-test.mjs --log server.log
+      - name: Logs
+        if: failure()
+        run: docker compose logs

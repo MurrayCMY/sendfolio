@@ -1,0 +1,19 @@
+SendFolio
+Copyright 2026 The SendFolio contributors
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product bundles or depends on third-party software and fonts under their own licenses, including:
+
+  Fonts (SIL Open Font License 1.1, https://openfontlicense.org)
+    - Jost (via @fontsource/jost), Copyright The Jost Project Authors
+    - Noto Sans SC (via @fontsource/noto-sans-sc), Copyright Google LLC / Adobe
+    The fonts are served from this application and embedded (subsetted) in generated PDFs.
+
+  Libraries (see package.json and each package's license)
+    - preact (MIT), pdf-lib (MIT), @pdf-lib/fontkit (MIT), nodemailer (MIT-0),
+      pg (MIT), @electric-sql/pglite (Apache-2.0 / PostgreSQL License), pdfjs-dist (Apache-2.0), vite (MIT), esbuild (MIT),
+      @napi-rs/canvas (MIT; development/demo only), @netlify/blobs (MIT; optional).
+
+All production dependencies are under permissive licenses (MIT, Apache-2.0, ISC, OFL-1.1, 0BSD, MIT-0, Zlib, CC0).
+Run `npx license-checker --production --summary` for the exact list for your installed versions.

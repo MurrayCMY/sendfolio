@@ -1,0 +1,48 @@
+{
+  "name": "sendfolio",
+  "version": "0.1.0",
+  "description": "Self-hosted document sharing with per-page reading analytics, NDA gating and dynamic watermarks. A free, open-source DocSend alternative for founders.",
+  "license": "Apache-2.0",
+  "private": false,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build:web && node scripts/build-server.mjs",
+    "build:web": "tsc --noEmit && vite build",
+    "start": "node dist-server/index.mjs",
+    "init": "node scripts/init.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "demo": "node scripts/build-server.mjs && node dist-server/demo.mjs",
+    "typecheck": "tsc --noEmit",
+    "i18n:check": "node scripts/i18n-check.mjs",
+    "test": "node scripts/smoke-test.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.6.0",
+    "@fontsource/jost": "^5.3.0",
+    "@fontsource/noto-sans-sc": "^5.3.1",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "nodemailer": "^10.6.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.5.438",
+    "pg": "^8.23.1",
+    "preact": "^11.2.0"
+  },
+  "optionalDependencies": {
+    "@netlify/blobs": "^11.1.10"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.2.0",
+    "@netlify/functions": "^6.1.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^26.6.6",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.8"
+  }
+}
