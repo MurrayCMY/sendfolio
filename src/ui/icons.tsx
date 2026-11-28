@@ -56,3 +56,27 @@ export const IconPulse = (p: P) => <Svg {...p}><path d="M3 12h4l3-8 4 16 3-8h4" 
 export const IconUser = (p: P) => <Svg {...p}><circle cx="12" cy="8" r="4" /><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" /></Svg>;
 export const IconDocs = (p: P) => <Svg {...p}><path d="M8 3h8l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm8 0v4h4M10 12h6M10 16h6" /></Svg>;
 export const IconKey = (p: P) => <Svg {...p}><circle cx="8" cy="15" r="4" /><path d="m11 12 9-9m-3 3 3 3m-6-0 2 2" /></Svg>;
+
+export const IconFolder = (p: P) => <Svg {...p}><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" /></Svg>;
+
+// ---- full-colour brand marks for Settings -> Alerts ----
+export const BrandSlack = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="icon">
+    <path fill="#E01E5A" d="M6 15a2 2 0 1 1-2-2h2v2Zm1 0a2 2 0 1 1 4 0v5a2 2 0 1 1-4 0v-5Z" />
+    <path fill="#36C5F0" d="M9 6a2 2 0 1 1 2-2v2H9Zm0 1a2 2 0 1 1 0 4H4a2 2 0 1 1 0-4h5Z" />
+    <path fill="#2EB67D" d="M18 9a2 2 0 1 1 2 2h-2V9Zm-1 0a2 2 0 1 1-4 0V4a2 2 0 1 1 4 0v5Z" />
+    <path fill="#ECB22E" d="M15 18a2 2 0 1 1-2 2v-2h2Zm0-1a2 2 0 1 1 0-4h5a2 2 0 1 1 0 4h-5Z" />
+  </svg>
+);
+export const BrandFeishu = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="icon">
+    <path fill="#00D6B9" d="M4.5 4.2 15.8 9.6c.8.4 1.2 1.3.9 2.2l-1.9 5.5-10.3-13.1Z" />
+    <path fill="#3370FF" d="M4.5 4.2 9.4 14l5.4 3.3-3.1 2.7c-1 .8-2.5.7-3.3-.3L3.8 14c-.6-.7-.8-1.7-.6-2.6l1.3-7.2Z" />
+    <path fill="#133C9A" d="M9.4 14 14.8 17.3l2.2-1.8-6.4-2.8-1.2 1.3Z" />
+  </svg>
+);
+export const BrandZap = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="#EA580C" aria-hidden="true" focusable="false" class="icon">
+    <path d="M13 2 4 14h7l-1 8 10-12h-7l0-8Z" />
+  </svg>
+);

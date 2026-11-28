@@ -12,7 +12,7 @@ export const config = {
   /** Legal or display name of the organisation sharing documents (NDA, confirmation emails). Defaults to APP_NAME. */
   companyName: (process.env.COMPANY_NAME || process.env.APP_NAME || "SendFolio").trim(),
   /** Accent colour used in emails (hex). The web UI colours live in src/styles.css (:root) and src/admin/admin.css (.admin). */
-  brandColor: /^#[0-9a-fA-F]{6}$/.test(process.env.BRAND_COLOR ?? "") ? process.env.BRAND_COLOR! : "#3949AB",
+  brandColor: /^#[0-9a-fA-F]{6}$/.test(process.env.BRAND_COLOR ?? "") ? process.env.BRAND_COLOR! : "#141413",
   /** Language used until a person picks one, and for emails to the admin. */
   defaultLocale: (process.env.DEFAULT_LOCALE === "zh" ? "zh" : "en") as Locale,
   /** IANA time zone for dates in the admin, emails and watermarks, e.g. Asia/Shanghai. */

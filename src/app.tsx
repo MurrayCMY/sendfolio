@@ -1,6 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { lazy, Suspense } from "preact/compat";
 import { appConfig, t } from "./i18n";
+import { Logo } from "./ui/Logo";
 import { Visitor } from "./visitor/Visitor";
 
 export function navigate(path: string) {
@@ -51,5 +52,14 @@ export function App() {
   if (m) return <Visitor slug={m[1]} />;
   const c = path.match(/^\/([A-Za-z0-9][A-Za-z0-9_-]{2,39})\/?$/);
   if (c) return <Visitor slug={c[1]} />;
-  return <div class="center muted">{appConfig.appName}</div>;
+  return (
+    <div class="center">
+      <div class="portal-card">
+        <div class="portal-mark" aria-hidden="true"><Logo size={20} /></div>
+        <h1>{appConfig.appName}</h1>
+        <p>{t("Private document portal. Use the personal link shared with you to view a document or data room.")}</p>
+        <Link href="/admin" class="portal-link">{t("Admin sign-in")} →</Link>
+      </div>
+    </div>
+  );
 }

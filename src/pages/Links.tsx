@@ -3,7 +3,7 @@ import { api, LinkRow, VersionRow } from "../api";
 import { Link } from "../app";
 import { fmtRelative, linkStatus, linkUrl } from "../format";
 import { Badge, EmptyState, Menu, toast } from "../ui/kit";
-import { IconAlert, IconCopy, IconEdit, IconEye, IconLink, IconPlus, IconTrash } from "../ui/icons";
+import { IconAlert, IconCheck, IconCopy, IconEdit, IconEye, IconLink, IconPlus, IconTrash } from "../ui/icons";
 import { Modal } from "../ui/Modal";
 import { BulkLinkDialog } from "./AllLinks";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -31,6 +31,12 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
   const [deleting, setDeleting] = useState<LinkRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [manualUrl, setManualUrl] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const flashCopy = (id: string, slug: string) => {
+    copyLink(slug, setManualUrl);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 1500);
+  };
 
   const load = () => api.links(docId).then((r) => setLinks(r.links)).catch((e) => setError(e.message));
   useEffect(() => { load(); }, [docId]);
@@ -75,7 +81,9 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
                     <td>
                       <span class="url-pill">
                         <span class="mono" title={linkUrl(l.slug)}>{location.host}/{l.slug}</span>
-                        <button class="icon-btn" aria-label={t("Copy the link “{0}”", l.name)} title={t("Copy link")} onClick={() => copyLink(l.slug, setManualUrl)}><IconCopy size={14} /></button>
+                        <button class={`icon-btn ${copiedId === l.id ? "copied" : ""}`} aria-label={t("Copy the link “{0}”", l.name)} title={t("Copy link")} onClick={() => flashCopy(l.id, l.slug)}>
+                          {copiedId === l.id ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                        </button>
                       </span>
                     </td>
                     <td><Badge tone={st.tone}>{st.text}</Badge></td>

@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { api, BrandingSettings, NdaListRow, WebhookConfig } from "../api";
 import { fmtTime } from "../format";
 import { appConfig, applyBrandTheme, t } from "../i18n";
-import { IconBan, IconCheck, IconLink, IconMail, IconPlus, IconPulse, IconSend, IconShield, IconTrash, IconUpload, IconUsers, IconX } from "../ui/icons";
+import { BrandFeishu, BrandSlack, BrandZap, IconBan, IconCheck, IconLink, IconMail, IconPlus, IconPulse, IconSend, IconShield, IconTrash, IconUpload, IconUsers, IconX } from "../ui/icons";
 import { Avatar, Badge, Card, Field, PageHeader, Switch, Tabs, toast } from "../ui/kit";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 type TabId = "branding" | "webhooks" | "team" | "nda" | "mail" | "domains";
 
-const COLOR_SWATCHES = ["#3949AB", "#1E3A8A", "#0F766E", "#15803D", "#B45309", "#BE123C", "#6D28D9", "#18181B"];
+const COLOR_SWATCHES = ["#141413", "#1E3A8A", "#1D4ED8", "#0F5132", "#0F766E", "#9A3412", "#9F1239", "#334155"];
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]+\.[^\s@]{2,}$/;
 
 function BrandingTab() {
@@ -168,15 +168,15 @@ function WebhooksTab() {
           <label>{t("Step 1: Choose where you want alerts")}</label>
           <div class="preset-grid" role="radiogroup" aria-label={t("Channel type")}>
             <button type="button" role="radio" aria-checked={kind === "slack"} class={`preset-card ${kind === "slack" ? "on" : ""}`} onClick={() => setKind("slack")}>
-              <b>Slack</b>
+              <span class="brand-head"><BrandSlack size={18} /><b>Slack</b></span>
               <span>{t("Post live reading cards to any Slack channel")}</span>
             </button>
             <button type="button" role="radio" aria-checked={kind === "lark"} class={`preset-card ${kind === "lark" ? "on" : ""}`} onClick={() => setKind("lark")}>
-              <b>{t("Feishu / Lark")}</b>
+              <span class="brand-head"><BrandFeishu size={18} /><b>{t("Feishu / Lark")}</b></span>
               <span>{t("Send interactive cards to a group chat bot")}</span>
             </button>
             <button type="button" role="radio" aria-checked={kind === "generic"} class={`preset-card ${kind === "generic" ? "on" : ""}`} onClick={() => setKind("generic")}>
-              <b>{t("Other (Zapier / Make / n8n)")}</b>
+              <span class="brand-head"><BrandZap size={18} /><b>{t("Other (Zapier / Make / n8n)")}</b></span>
               <span>{t("Connect to any automation tool")}</span>
             </button>
           </div>

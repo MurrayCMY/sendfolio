@@ -5,7 +5,7 @@ import { Link, navigate } from "../app";
 import { appConfig, t, useLang } from "../i18n";
 import { LangSwitch } from "../ui/LangSwitch";
 import { Logo } from "../ui/Logo";
-import { IconFile, IconHome, IconLink, IconLogout, IconSettings, IconUsers } from "../ui/icons";
+import { IconFile, IconFolder, IconHome, IconLink, IconLogout, IconMenu, IconSettings, IconUsers, IconX } from "../ui/icons";
 import { ToastHost } from "../ui/kit";
 import { Login } from "../pages/Login";
 import { Overview } from "../pages/Overview";
@@ -32,6 +32,15 @@ function sectionOf(path: string): { key: Section; title: string } {
 export function AdminShell({ path }: { path: string }) {
   const [state, setState] = useState<"loading" | "in" | "out">("loading");
   const [notice, setNotice] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => { setDrawerOpen(false); }, [path]);
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setDrawerOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
 
   useEffect(() => {
     api.me().then((r) => setState(r.admin ? "in" : "out")).catch(() => setState("out"));
@@ -63,15 +72,26 @@ export function AdminShell({ path }: { path: string }) {
 
   return (
     <div class="admin">
-      <aside class="side">
+      <a href="#main" class="skip-link">{t("Skip to content")}</a>
+      <header class="mob-bar">
         <Link href="/admin" class="side-brand">
-          <span class="mark" aria-hidden="true"><Logo size={20} /></span>
+          <span class="mark" aria-hidden="true"><Logo size={18} /></span>
+          <span><b>{appConfig.appName}</b></span>
+        </Link>
+        <button type="button" class="mob-menu-btn" aria-label={drawerOpen ? t("Close") : t("Menu")} aria-expanded={drawerOpen} onClick={() => setDrawerOpen(!drawerOpen)}>
+          {drawerOpen ? <IconX size={18} /> : <IconMenu size={18} />}
+        </button>
+      </header>
+      {drawerOpen && <div class="drawer-mask" onClick={() => setDrawerOpen(false)} />}
+      <aside class={`side ${drawerOpen ? "open" : ""}`}>
+        <Link href="/admin" class="side-brand">
+          <span class="mark" aria-hidden="true"><Logo size={18} /></span>
           <span><b>{appConfig.appName}</b><small>{t("Document admin")}</small></span>
         </Link>
         <nav aria-label={t("Main navigation")}>
           <Link href="/admin" class="nav-item" current={cur("home")}><IconHome />{" "}{t("Overview")}</Link>
           <Link href="/admin/documents" class="nav-item" current={cur("docs")}><IconFile />{" "}{t("Documents")}</Link>
-          <Link href="/admin/rooms" class="nav-item" current={cur("rooms")}><IconFile />{" "}{t("Data rooms")}</Link>
+          <Link href="/admin/rooms" class="nav-item" current={cur("rooms")}><IconFolder />{" "}{t("Data rooms")}</Link>
           <Link href="/admin/links" class="nav-item" current={cur("links")}><IconLink />{" "}{t("Links")}</Link>
           <Link href="/admin/visitors" class="nav-item" current={cur("visitors")}><IconUsers />{" "}{t("Visitors")}</Link>
           <Link href="/admin/settings" class="nav-item" current={cur("settings")}><IconSettings />{" "}{t("Settings")}</Link>
@@ -82,7 +102,7 @@ export function AdminShell({ path }: { path: string }) {
           <button onClick={async () => { await api.logout(); setNotice(""); setState("out"); }}><IconLogout size={16} />{" "}{t("Sign out")}</button>
         </div>
       </aside>
-      <main class="main">
+      <main id="main" class="main">
         <div class="main-inner" key={lang}>
           {detail ? <DocumentDetail id={detail[1]} />
             : roomId ? <RoomDetail id={roomId} />

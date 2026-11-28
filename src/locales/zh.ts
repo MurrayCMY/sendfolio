@@ -662,4 +662,7 @@ export const zh: Record<string, string> = {
   "NDA": "保密协议",
   "Email delivery": "邮件送达",
   "Blocked emails": "个人邮箱屏蔽",
+  "Skip to content": "跳至正文",
+  "Menu": "菜单",
+  "Private document portal. Use the personal link shared with you to view a document or data room.": "私密文档门户。请通过发送给您的专属链接打开文档或数据室。",
 };

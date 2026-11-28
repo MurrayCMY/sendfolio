@@ -237,13 +237,13 @@ export function Reader(ctx: Ctx & { docId?: string; onBackToRoom?: () => void })
           )}
           <section class={`rstage ${zoomed ? "zoomed" : ""}`} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
             <div class="rtools">
-              <button class="tool" aria-label={t.thumbs} aria-pressed={showThumbs} onClick={() => setShowThumbs(!showThumbs)}><IconMenu /></button>
-              <button class="tool" aria-label={zoomed ? t.zoomOut : t.zoomIn} aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>
+              <button class="tool" title={t.thumbs} aria-label={t.thumbs} aria-pressed={showThumbs} onClick={() => setShowThumbs(!showThumbs)}><IconMenu /></button>
+              <button class="tool" title={zoomed ? t.zoomOut : t.zoomIn} aria-label={zoomed ? t.zoomOut : t.zoomIn} aria-pressed={zoomed} onClick={() => setZoomed(!zoomed)}>
                 {zoomed ? <IconZoomOut /> : <IconZoomIn />}
               </button>
-              <button class="tool" aria-label={t.allPages} onClick={() => setGridOpen(true)}><IconGrid /></button>
+              <button class="tool" title={`${t.allPages} (G)`} aria-label={t.allPages} onClick={() => setGridOpen(true)}><IconGrid /></button>
               {canFs && (
-                <button class="tool" aria-label={fs ? t.exitFullscreen : t.fullscreen} aria-pressed={fs} onClick={toggleFs}>
+                <button class="tool" title={`${fs ? t.exitFullscreen : t.fullscreen} (F)`} aria-label={fs ? t.exitFullscreen : t.fullscreen} aria-pressed={fs} onClick={toggleFs}>
                   {fs ? <IconFullscreenExit /> : <IconFullscreen />}
                 </button>
               )}

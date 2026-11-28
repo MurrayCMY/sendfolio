@@ -15,7 +15,7 @@ const DICTS: Record<Lang, Record<string, string>> = { en: {}, zh };
 /** Filled from /api/v/_/config at start-up (see loadConfig). */
 export const appConfig = {
   appName: "SendFolio",
-  brandColor: "#3949AB",
+  brandColor: "#141413",
   logoUrl: null as string | null,
   ctaLabel: null as string | null,
   ctaUrl: null as string | null,
