@@ -13,7 +13,23 @@ export const LANGS: { code: Lang; label: string }[] = [{ code: "en", label: "Eng
 const DICTS: Record<Lang, Record<string, string>> = { en: {}, zh };
 
 /** Filled from /api/v/_/config at start-up (see loadConfig). */
-export const appConfig = { appName: "SendFolio", defaultLocale: "en" as Lang, timezone: "UTC" };
+export const appConfig = {
+  appName: "SendFolio",
+  brandColor: "#3949AB",
+  logoUrl: null as string | null,
+  ctaLabel: null as string | null,
+  ctaUrl: null as string | null,
+  defaultLocale: "en" as Lang,
+  timezone: "UTC",
+};
+
+export function applyBrandTheme(hex: string) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  appConfig.brandColor = hex;
+  const r = document.documentElement.style;
+  r.setProperty("--primary", hex);
+  r.setProperty("--a-primary", hex);
+}
 
 const STORAGE_KEY = "sendfolio_lang";
 let current: Lang = "en";
@@ -57,7 +73,11 @@ export async function loadConfig(): Promise<void> {
     const r = await fetch("/api/v/_/config");
     if (r.ok) {
       const c = await r.json();
-      if (typeof c.app_name === "string") appConfig.appName = c.app_name;
+      if (typeof c.app_name === "string" && c.app_name.trim()) appConfig.appName = c.app_name;
+      if (typeof c.brand_color === "string") applyBrandTheme(c.brand_color);
+      appConfig.logoUrl = typeof c.logo_url === "string" ? c.logo_url : null;
+      appConfig.ctaLabel = typeof c.cta_label === "string" ? c.cta_label : null;
+      appConfig.ctaUrl = typeof c.cta_url === "string" ? c.cta_url : null;
       if (isLang(c.default_locale)) appConfig.defaultLocale = c.default_locale;
       if (typeof c.timezone === "string") appConfig.timezone = c.timezone;
     }

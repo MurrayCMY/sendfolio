@@ -12,6 +12,7 @@ import { getActiveNda, ndaHash } from "../lib/nda";
 import { checkOtp, issueOtp } from "../lib/otp";
 import { ensureSignedPdf, sendNdaEmail } from "../lib/nda-sign";
 import { overLimit, record } from "../lib/ratelimit";
+import { envAdminEmails, getAllAdminEmails, getBranding, getExtraAdminEmails, getWebhooks, postWebhook, saveBranding, saveExtraAdminEmails, saveWebhooks } from "../lib/settings";
 import {
   deleteLink, deleteVisitor, deleteVisits, documentStats, documentVisits, exportPageViews, exportVisits, linkDetail, ndaAcceptances, overview, recentVisits, visitDetail, visitorDetail, visitorsList,
 } from "../lib/stats";
@@ -52,7 +53,8 @@ async function handleAuth(req: Request, ctx: Ctx, action: string): Promise<Respo
   if (action === "request" && req.method === "POST") {
     const email = normEmail((await readJson(req)).email);
     // Same response whether or not the email matches, so the endpoint doesn't reveal who the admin is.
-    const isAdminEmail = !!email && email === normEmail(process.env.ADMIN_EMAIL);
+    const admins = await getAllAdminEmails();
+    const isAdminEmail = !!email && admins.includes(email);
     const r = await issueOtp(email, "admin", ctx.ip ?? "unknown", isAdminEmail);
     if (!r.ok) {
       return fail(429, r.reason === "wait" ? "Please wait a moment before requesting another code." : "Too many requests. Please try again later.");
@@ -385,9 +387,207 @@ async function setActiveNda(id: string): Promise<Response> {
   return json({ ok: true });
 }
 
+async function listAllLinks(): Promise<Response> {
+  const rows = await db.sql`
+    select l.id, l.document_id, l.room_id, l.pinned_version_id, l.slug, l.name, l.enabled, l.expires_at,
+           l.require_email, l.require_otp, l.block_personal_email, l.allowed_domains, l.require_nda,
+           (l.password_hash is not null) as has_password, l.allow_download, l.watermark,
+           l.watermark_fields, l.watermark_text, l.notify_on_open, l.created_at,
+           coalesce(r.title, d.title) as doc_title,
+           case when l.room_id is not null then (r.archived_at is not null) else (d.archived_at is not null) end as doc_archived,
+           count(distinct v.visitor_id)::int as visitor_count,
+           count(v.id)::int as visit_count,
+           max(v.started_at) as last_visit_at
+    from links l
+    join documents d on d.id = l.document_id
+    left join data_rooms r on r.id = l.room_id
+    left join visits v on v.link_id = l.id
+    group by l.id, d.title, d.archived_at, r.title, r.archived_at
+    order by l.created_at desc`;
+  return json({ links: rows });
+}
+
+/* ---------------- data rooms ---------------- */
+
+async function listRooms(): Promise<Response> {
+  const rows = await db.sql`
+    select r.id, r.title, r.description, r.archived_at, r.created_at,
+           (select count(*)::int from data_room_items i join documents d on d.id = i.document_id where i.room_id = r.id and d.archived_at is null) as doc_count,
+           (select count(*)::int from links l where l.room_id = r.id) as link_count,
+           (select count(v.id)::int from links l join visits v on v.link_id = l.id where l.room_id = r.id) as visit_count
+    from data_rooms r
+    order by r.archived_at is not null, r.created_at desc`;
+  return json({ rooms: rows });
+}
+
+async function getRoom(id: string): Promise<Response> {
+  const [room] = await db.sql`select id, title, description, archived_at, created_at from data_rooms where id = ${id}`;
+  if (!room) return fail(404, "Data room not found");
+  const items = await db.sql`
+    select i.id, i.document_id, i.section, i.sort_order, d.title, d.archived_at,
+           dv.id as version_id, dv.version_label, dv.page_count
+    from data_room_items i
+    join documents d on d.id = i.document_id
+    left join lateral (
+      select id, version_label, page_count from document_versions
+      where document_id = d.id and status = 'ready' order by created_at desc limit 1
+    ) dv on true
+    where i.room_id = ${id}
+    order by i.sort_order, i.created_at`;
+  const links = await db.sql`
+    select l.id, l.document_id, l.room_id, l.pinned_version_id, l.slug, l.name, l.enabled, l.expires_at,
+           l.require_email, l.require_otp, l.block_personal_email, l.allowed_domains, l.require_nda,
+           (l.password_hash is not null) as has_password, l.allow_download, l.watermark,
+           l.watermark_fields, l.watermark_text, l.notify_on_open, l.created_at,
+           count(distinct v.visitor_id)::int as visitor_count,
+           count(v.id)::int as visit_count,
+           max(v.started_at) as last_visit_at
+    from links l left join visits v on v.link_id = l.id
+    where l.room_id = ${id}
+    group by l.id
+    order by l.created_at desc`;
+  return json({ room, items, links });
+}
+
+async function createRoom(req: Request): Promise<Response> {
+  const b = await readJson(req);
+  const title = String(b.title ?? "").trim().slice(0, 160);
+  if (!title) return fail(400, "Please enter a data room title");
+  const description = String(b.description ?? "").trim().slice(0, 1000) || null;
+  const rawItems = Array.isArray(b.items) ? b.items : [];
+  const id = await inTransaction(async (c) => {
+    const r = await c.query("insert into data_rooms (title, description) values ($1, $2) returning id", [title, description]);
+    const roomId = String(r.rows[0].id);
+    let idx = 0;
+    for (const it of rawItems.slice(0, 50)) {
+      if (!it || typeof it !== "object") continue;
+      const o = it as Record<string, unknown>;
+      const docId = String(o.document_id ?? "");
+      if (!UUID_RE.test(docId)) continue;
+      const section = String(o.section ?? "").trim().slice(0, 80) || null;
+      await c.query(
+        "insert into data_room_items (room_id, document_id, section, sort_order) values ($1, $2, $3, $4) on conflict (room_id, document_id) do nothing",
+        [roomId, docId, section, idx++],
+      );
+    }
+    return roomId;
+  });
+  return json({ id }, 201);
+}
+
+async function updateRoom(req: Request, id: string): Promise<Response> {
+  const [cur] = await db.sql`select id, title, description from data_rooms where id = ${id}`;
+  if (!cur) return fail(404, "Data room not found");
+  const b = await readJson(req);
+  const title = b.title === undefined ? cur.title : String(b.title ?? "").trim().slice(0, 160);
+  if (!title) return fail(400, "Please enter a data room title");
+  const description = b.description === undefined ? cur.description : String(b.description ?? "").trim().slice(0, 1000) || null;
+  await inTransaction(async (c) => {
+    await c.query("update data_rooms set title = $1, description = $2 where id = $3", [title, description, id]);
+    if (Array.isArray(b.items)) {
+      await c.query("delete from data_room_items where room_id = $1", [id]);
+      let idx = 0;
+      for (const it of b.items.slice(0, 50)) {
+        if (!it || typeof it !== "object") continue;
+        const o = it as Record<string, unknown>;
+        const docId = String(o.document_id ?? "");
+        if (!UUID_RE.test(docId)) continue;
+        const section = String(o.section ?? "").trim().slice(0, 80) || null;
+        await c.query(
+          "insert into data_room_items (room_id, document_id, section, sort_order) values ($1, $2, $3, $4) on conflict (room_id, document_id) do nothing",
+          [id, docId, section, idx++],
+        );
+      }
+    }
+  });
+  return json({ ok: true });
+}
+
+async function createRoomLink(req: Request, roomId: string): Promise<Response> {
+  const [room] = await db.sql<{ archived_at: string | null }>`select archived_at from data_rooms where id = ${roomId}`;
+  if (!room) return fail(404, "Data room not found");
+  if (room.archived_at) return fail(400, "This data room is archived");
+  const [first] = await db.sql<{ document_id: string }>`
+    select i.document_id from data_room_items i join documents d on d.id = i.document_id
+    where i.room_id = ${roomId} and d.archived_at is null order by i.sort_order, i.created_at limit 1`;
+  if (!first) return fail(400, "Add at least one document to the data room before creating a link");
+
+  const b = await readJson(req);
+  const name = String(b.name ?? "").trim().slice(0, 120);
+  if (!name) return fail(400, "Please enter a link name");
+  const requireEmail = bool(b.require_email, true);
+  const expires = b.expires_at ? new Date(String(b.expires_at)) : null;
+  if (expires && Number.isNaN(expires.getTime())) return fail(400, "Invalid expiry date");
+  const password = typeof b.password === "string" && b.password ? hashPassword(b.password) : null;
+  const wmFields = b.watermark_fields === undefined ? ["email", "date"] : cleanFields(b.watermark_fields);
+  const wmText = String(b.watermark_text ?? "").trim().slice(0, 40) || null;
+  const custom = typeof b.slug === "string" ? b.slug.trim() : "";
+  if (custom) {
+    const bad = validateSlug(custom);
+    if (bad) return fail(400, bad);
+    const [dup] = await db.sql`select 1 as ok from links where lower(slug) = lower(${custom})`;
+    if (dup) return fail(409, "This link address is already taken. Please choose another.");
+  }
+  for (let i = 0; i < 5; i++) {
+    const [row] = await db.sql<{ id: string; slug: string }>`
+      insert into links (document_id, room_id, slug, name, enabled, expires_at, require_email, require_otp,
+                         block_personal_email, allowed_domains, require_nda, password_hash, allow_download, watermark, notify_on_open,
+                         watermark_fields, watermark_text)
+      values (${first.document_id}, ${roomId}, ${custom || newSlug()}, ${name}, ${bool(b.enabled, true)}, ${expires?.toISOString() ?? null},
+              ${requireEmail}, ${requireEmail && bool(b.require_otp, true)},
+              ${requireEmail && bool(b.block_personal_email, true)}, ${parseDomains(b.allowed_domains)},
+              ${requireEmail && bool(b.require_nda, true)}, ${password}, ${bool(b.allow_download, false)},
+              ${bool(b.watermark, true)}, ${bool(b.notify_on_open, true)}, ${wmFields}, ${wmText})
+      on conflict do nothing returning id, slug`;
+    if (row) return json(row, 201);
+    if (custom) return fail(409, "This link address is already taken. Please choose another.");
+  }
+  return fail(500, "Could not create the link. Please try again.");
+}
+
+async function createBulkLinks(req: Request, docId: string): Promise<Response> {
+  const [doc] = await db.sql<{ archived_at: string | null }>`select archived_at from documents where id = ${docId}`;
+  if (!doc) return fail(404, "Document not found");
+  if (doc.archived_at) return fail(400, "This document is archived; you cannot create new links for it");
+  const b = await readJson(req);
+  const rawNames = Array.isArray(b.names) ? b.names : [];
+  const names = [...new Set(rawNames.map((n) => String(n ?? "").trim().slice(0, 120)).filter(Boolean))].slice(0, 50);
+  if (!names.length) return fail(400, "Please enter at least one link name");
+
+  const requireEmail = bool(b.require_email, true);
+  const expires = b.expires_at ? new Date(String(b.expires_at)) : null;
+  if (expires && Number.isNaN(expires.getTime())) return fail(400, "Invalid expiry date");
+  const wmFields = b.watermark_fields === undefined ? ["email", "date"] : cleanFields(b.watermark_fields);
+  const wmText = String(b.watermark_text ?? "").trim().slice(0, 40) || null;
+  const created: { id: string; name: string; slug: string }[] = [];
+
+  for (const name of names) {
+    for (let i = 0; i < 5; i++) {
+      const [row] = await db.sql<{ id: string; slug: string }>`
+        insert into links (document_id, slug, name, enabled, expires_at, require_email, require_otp,
+                           block_personal_email, allowed_domains, require_nda, allow_download, watermark, notify_on_open,
+                           watermark_fields, watermark_text)
+        values (${docId}, ${newSlug()}, ${name}, true, ${expires?.toISOString() ?? null},
+                ${requireEmail}, ${requireEmail && bool(b.require_otp, true)},
+                ${requireEmail && bool(b.block_personal_email, true)}, ${parseDomains(b.allowed_domains)},
+                ${requireEmail && bool(b.require_nda, true)}, ${bool(b.allow_download, false)},
+                ${bool(b.watermark, true)}, ${bool(b.notify_on_open, true)}, ${wmFields}, ${wmText})
+        on conflict do nothing returning id, slug`;
+      if (row) { created.push({ id: row.id, name, slug: row.slug }); break; }
+    }
+  }
+  return json({ links: created }, 201);
+}
+
 async function getSettings(): Promise<Response> {
   const [row] = await db.sql<{ value: string[] }>`select value from settings where key = 'personal_email_domains'`;
-  return json({ personal_email_domains: row?.value ?? [] });
+  return json({
+    personal_email_domains: row?.value ?? [],
+    branding: await getBranding(),
+    webhooks: await getWebhooks(),
+    primary_admins: envAdminEmails(),
+    extra_admins: await getExtraAdminEmails(),
+  });
 }
 
 async function putPersonalDomains(req: Request): Promise<Response> {
@@ -416,6 +616,7 @@ export default async (req: Request, ctx: Ctx): Promise<Response> => {
       if (root === "overview") return await overview();
       if (root === "visitors") return a && UUID_RE.test(a) ? await visitorDetail(a) : await visitorsList();
       if (root === "visits" && a && UUID_RE.test(a)) return await visitDetail(a);
+      if (root === "links" && !a) return await listAllLinks();
       if (root === "links" && a && UUID_RE.test(a) && !b) return await linkDetail(a);
       if (root === "nda-acceptances" && !a) return await ndaAcceptances();
       if (root === "nda-acceptances" && a && UUID_RE.test(a) && b === "pdf") {
@@ -449,6 +650,20 @@ export default async (req: Request, ctx: Ctx): Promise<Response> => {
       }
     }
 
+    if (root === "rooms") {
+      if (!a) {
+        if (m === "GET") return await listRooms();
+        if (m === "POST") return await createRoom(req);
+      } else if (UUID_RE.test(a)) {
+        if (!b && m === "GET") return await getRoom(a);
+        if (!b && m === "PATCH") return await updateRoom(req, a);
+        if (b === "links" && m === "POST") return await createRoomLink(req, a);
+        if (b === "archive" && m === "POST") {
+          await db.sql`update data_rooms set archived_at = now() where id = ${a} and archived_at is null`;
+          return json({ ok: true });
+        }
+      }
+    }
     if (root === "documents") {
       if (!a) {
         if (m === "GET") return await listDocuments();
@@ -464,8 +679,9 @@ export default async (req: Request, ctx: Ctx): Promise<Response> => {
           return json({ ok: true });
         }
         if (b === "versions" && m === "POST") return await createVersion(req, a);
-        if (b === "links" && m === "GET") return await listLinks(a);
-        if (b === "links" && m === "POST") return await createLink(req, a);
+        if (b === "links" && !rest[0] && m === "GET") return await listLinks(a);
+        if (b === "links" && !rest[0] && m === "POST") return await createLink(req, a);
+        if (b === "links" && rest[0] === "bulk" && m === "POST") return await createBulkLinks(req, a);
         if (b === "archive" && m === "POST") {
           await db.sql`update documents set archived_at = now() where id = ${a} and archived_at is null`;
           return json({ ok: true });
@@ -534,6 +750,22 @@ export default async (req: Request, ctx: Ctx): Promise<Response> => {
     if (root === "settings") {
       if (!a && m === "GET") return await getSettings();
       if (a === "personal-domains" && m === "PUT") return await putPersonalDomains(req);
+      if (a === "branding" && m === "PUT") return json({ branding: await saveBranding(await readJson(req)) });
+      if (a === "webhooks" && !b && m === "PUT") return json({ webhooks: await saveWebhooks((await readJson(req)).webhooks) });
+      if (a === "webhooks" && b === "test" && m === "POST") {
+        const body = await readJson(req);
+        const url = String(body.url ?? "").trim();
+        if (!/^https?:\/\//i.test(url)) return fail(400, "Please enter a valid webhook URL");
+        const kind = body.kind === "slack" || body.kind === "lark" ? body.kind : "generic";
+        const res = await postWebhook({ id: "test", name: "Test", url, kind, enabled: true }, {
+          event: "test",
+          title: "SendFolio test notification",
+          body: "Your webhook is connected and ready to deliver real-time reading alerts.",
+          admin_url: `${(process.env.SITE_URL ?? "").replace(/\/$/, "")}/admin`,
+        });
+        return json(res, res.ok ? 200 : 502);
+      }
+      if (a === "admins" && m === "PUT") return json({ extra_admins: await saveExtraAdminEmails((await readJson(req)).emails) });
     }
     if (root === "versions" && a && UUID_RE.test(a)) {
       return await handleVersion(req, a, [b ?? "", ...rest]);

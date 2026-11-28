@@ -214,13 +214,15 @@ flowchart LR
 
 ## 🗺️ 状态与路线图
 
-SendFolio 还很年轻（**v0.1**）。Docker Compose、直接用 Node 和 PostgreSQL 都在每次提交的 CI 里测试。
+SendFolio 当前版本为 **v0.2**。Docker Compose、直接用 Node 和 PostgreSQL 都在每次提交的 CI 里测试。
 
 - [x] Docker、Netlify 和直接用 Node 部署 · 中英双语 · NDA 电子签署 · 水印 · 跟进备注
-- [ ] 兼容 S3 的文件存储（用于多副本和托管平台）
-- [ ] 团队成员和角色
-- [ ] 数据室：一个链接包含多份文档
-- [ ] Webhook 以及 Slack / 飞书通知
+- [x] 深色画廊阅读器 · 拖拽上传 · 安全预设 · 批量生成链接 · 一键以访客视角预览
+- [x] 后台自定义品牌与阅读页行动按钮 · 转发监测提醒 · 多版本阅读数据对比
+- [x] 兼容 S3 的对象存储（Cloudflare R2、AWS S3、阿里云 OSS、MinIO）
+- [x] 团队 / 联合创始人多管理员权限
+- [x] 数据室：一条链接、一份 NDA 分享整套资料
+- [x] 实时推送提醒：Slack、飞书 / Lark 与通用 Webhook
 - [ ] 更多语言
 
 欢迎提想法和 PR：[CONTRIBUTING.md](CONTRIBUTING.md)。

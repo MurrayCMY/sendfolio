@@ -1,9 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 import { api, Overview as OverviewData, VisitRow } from "../api";
-import { Link } from "../app";
+import { Link, navigate } from "../app";
 import { tzFormat, fmtDur, fmtRelative, fmtTime, intentReason, visitorStatus } from "../format";
-import { IconAlert, IconCheck, IconClock, IconEye, IconInbox, IconLink, IconMail, IconPulse, IconTrending, IconUsers } from "../ui/icons";
+import { IconAlert, IconCheck, IconClock, IconEye, IconInbox, IconLink, IconPlus, IconPulse, IconTrending, IconUsers } from "../ui/icons";
 import { Card, PageHeader, Spark, StatCard } from "../ui/kit";
+import { UploadDialog } from "./UploadDialog";
 import { VisitTable } from "./VisitTable";
 import { t } from "../i18n";
 
@@ -16,6 +17,7 @@ function series(daily: { day: string; n: number }[]): number[] {
 export function Overview() {
   const [data, setData] = useState<OverviewData | null>(null);
   const [recent, setRecent] = useState<VisitRow[] | null>(null);
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -32,12 +34,17 @@ export function Overview() {
   const delta = k && k.visits_prev_7d > 0 ? (k.visits_7d - k.visits_prev_7d) / k.visits_prev_7d : null;
   const attention: { text: any }[] = [];
   if (data?.pending_nda_emails) attention.push({ text: <>{t("{0} NDA confirmation emails have not been sent yet. They are retried every 10 minutes.", data.pending_nda_emails)}<Link href="/admin/settings">{t("View")}</Link></> });
+  for (const f of data?.forwarded ?? []) attention.push({ text: <>{t("Possible forward: “")}<Link href={`/admin/links/${f.id}`}>{f.name}</Link>{t("” ({0}) was opened by {1} different people.", f.title, f.visitor_count)}</> });
   for (const l of data?.expiring ?? []) attention.push({ text: <>{t("The link “")}<Link href={`/admin/documents/${l.document_id}?tab=links`}>{l.name}</Link>{t("” expires on {0}.", fmtTime(l.expires_at))}</> });
   const live = (recent ?? []).filter((v) => v.last_heartbeat_at && Date.now() - new Date(v.last_heartbeat_at).getTime() < 45000).length;
 
   return (
     <>
-      <PageHeader title={t("Overview")} subtitle={t("Reading activity over the last 7 days. Times are in the server time zone.")} />
+      <PageHeader
+        title={t("Overview")}
+        subtitle={t("Your reading activity over the last 7 days.")}
+        actions={<button class="btn btn-primary" onClick={() => setCreating(true)}><IconPlus size={16} />{" "}{t("New document")}</button>}
+      />
       {error && <p class="field-error" role="alert">{error}</p>}
 
       {attention.length > 0 && (
@@ -63,7 +70,7 @@ export function Overview() {
           ) : (
             <ul class="signal-list">
               {data.followups.map((f) => (
-                <li key={f.id}>
+                <li key={f.id} class="clickable" onClick={() => navigate(`/admin/visitors/${f.id}`)}>
                   <span class={`sig-icon ${f.visits >= 2 && f.depth >= 0.6 ? "hot" : ""}`}><IconTrending size={17} /></span>
                   <span class="sig-main"><Link href={`/admin/visitors/${f.id}`}><b>{f.name}</b></Link><span>{intentReason(f)}</span></span>
                   <span class="sig-side">{visitorStatus(f.status).label}<br />{fmtRelative(f.last_at)}</span>
@@ -78,7 +85,7 @@ export function Overview() {
           ) : (
             <ul class="signal-list">
               {data.unopened.map((l) => (
-                <li key={l.id}>
+                <li key={l.id} class="clickable" onClick={() => navigate(`/admin/documents/${l.document_id}?tab=links`)}>
                   <span class="sig-icon"><IconLink size={17} /></span>
                   <span class="sig-main"><Link href={`/admin/documents/${l.document_id}?tab=links`}><b>{l.name}</b></Link><span>{l.title}</span></span>
                   <span class="sig-side">{t("Created on")}<br />{fmtRelative(l.created_at)}</span>
@@ -99,6 +106,7 @@ export function Overview() {
           <VisitTable visits={recent.slice(0, 12)} show={{ who: true, linkDoc: true }} />
         )}
       </Card>
+      {creating && <UploadDialog onClose={() => setCreating(false)} onDone={(id) => navigate(`/admin/documents/${id}`)} />}
     </>
   );
 }

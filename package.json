@@ -1,6 +1,6 @@
 {
   "name": "sendfolio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Self-hosted document sharing with per-page reading analytics, NDA gating and dynamic watermarks. A free, open-source DocSend alternative for founders.",
   "license": "Apache-2.0",
   "private": false,

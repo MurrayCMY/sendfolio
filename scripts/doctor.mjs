@@ -48,7 +48,10 @@ if (dbUrl) {
 }
 
 // storage
-try {
+if (process.env.STORAGE_DRIVER === "s3" || process.env.S3_BUCKET) {
+  const ok = !!(process.env.S3_BUCKET && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY);
+  add("storage", ok ? "ok" : "fail", ok ? `S3-compatible storage configured (bucket: ${process.env.S3_BUCKET})` : "S3 storage is missing credentials", "Set S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY and S3_ENDPOINT.");
+} else try {
   const dir = process.env.STORAGE_DIR ?? "./data/files";
   fs.mkdirSync(dir, { recursive: true });
   const probe = `${dir}/.doctor-${process.pid}`;

@@ -3,6 +3,7 @@ import { call, imageUrl, OpenData, takePrefetchedOpen } from "./vapi";
 import { useTracking } from "./tracking";
 import { fetchPage, PageCanvas } from "./PageCanvas";
 import { sentinelBackground, useWatermarkGuard } from "./watermark";
+import { appConfig } from "../i18n";
 import { Brand, Ctx, LangToggle } from "./Visitor";
 import { IconChevronLeft, IconChevronRight, IconDownload, IconFullscreen, IconFullscreenExit, IconGrid, IconMenu, IconX, IconZoomIn, IconZoomOut } from "../ui/icons";
 
@@ -22,8 +23,8 @@ const readLast = (slug: string): number | null => {
   try { const n = Number(localStorage.getItem(lastKey(slug))); return Number.isInteger(n) && n > 0 ? n : null; } catch { return null; }
 };
 
-export function Reader(ctx: Ctx) {
-  const { slug, t, lang, setLang } = ctx;
+export function Reader(ctx: Ctx & { docId?: string; onBackToRoom?: () => void }) {
+  const { slug, t, lang, setLang, docId, onBackToRoom } = ctx;
   const [data, setData] = useState<OpenData | null>(null);
   const [page, setPage] = useState(1);
   const [showThumbs, setShowThumbs] = useState(true);
@@ -55,17 +56,17 @@ export function Reader(ctx: Ctx) {
 
   useEffect(() => {
     (async () => {
-      const pre = takePrefetchedOpen(slug);
+      const pre = !docId ? takePrefetchedOpen(slug) : undefined;
       let r = pre ? await pre : undefined;
-      if (!r || !r.ok) r = await call<OpenData>(slug, "open", {});
+      if (!r || !r.ok) r = await call<OpenData>(slug, "open", docId ? { document_id: docId } : {});
       if (r.ok) {
         setData(r.data);
-        const saved = readLast(slug);
+        const saved = readLast(docId ? `${slug}_${docId}` : slug);
         if (saved && saved > 1 && saved <= r.data.page_count) { setPage(saved); setResumeNote(saved); }
       } else if (r.status === 404) ctx.invalidate();
       else ctx.refresh(); // e.g. NDA still required, or session lost
     })();
-  }, [slug]);
+  }, [slug, docId]);
 
   // An image request failing usually means the link was switched off while reading.
   const recheck = async () => {
@@ -76,7 +77,7 @@ export function Reader(ctx: Ctx) {
     setTimeout(() => (checking.current = false), 3000);
   };
 
-  useTracking(slug, data?.visit_id, page, ctx.invalidate);
+  useTracking(slug, data?.preview ? undefined : data?.visit_id, page, ctx.invalidate);
 
   const count = data?.page_count ?? 0;
   const clamp = (n: number) => Math.min(Math.max(1, n), Math.max(count, 1));
@@ -181,7 +182,7 @@ export function Reader(ctx: Ctx) {
 
   const wm = data.watermark;
   const pages = Array.from({ length: count }, (_, i) => i + 1);
-  const img = (kind: "pages" | "thumbs", n: number) => imageUrl(slug, kind, data.visit_id, n);
+  const img = (kind: "pages" | "thumbs", n: number) => imageUrl(slug, kind, data.visit_id, n, docId ?? data.document_id);
   const block = (e: Event) => e.preventDefault();
   const onTouchStart = (e: TouchEvent) => { const p = e.touches[0]; touch.current = { x: p.clientX, y: p.clientY }; };
   const onTouchEnd = (e: TouchEvent) => {
@@ -194,9 +195,22 @@ export function Reader(ctx: Ctx) {
 
   return (
     <div class={`reader ${fs ? "fs" : ""}`} ref={rootRef} onContextMenu={block} onDragStart={block}>
+      {data.preview && (
+        <div class="preview-bar" role="status">
+          <span>{t.previewBanner}</span>
+          <a href="/admin">{t.exitPreview}</a>
+        </div>
+      )}
       <header class="rhead">
-        <Brand />
+        {onBackToRoom ? (
+          <button type="button" class="rback" onClick={onBackToRoom}>← {t.backToRoom}</button>
+        ) : (
+          <Brand />
+        )}
         <h1 class="rtitle">{data.title}</h1>
+        {appConfig.ctaLabel && appConfig.ctaUrl && (
+          <a class="rcta" href={appConfig.ctaUrl} target="_blank" rel="noopener noreferrer">{appConfig.ctaLabel}</a>
+        )}
         {data.allow_download && !inWechat && (
           <a class="dlbtn" href={`/api/v/${slug}/download/${data.visit_id}`}><IconDownload size={16} /> {t.download}</a>
         )}
@@ -237,6 +251,7 @@ export function Reader(ctx: Ctx) {
             <div class="rpage" onClick={() => setZoomed((z) => !z)}>
               <PageCanvas url={img("pages", page)} maxWidth={2400} wm={wm} label={t.pageLabel(page, count)} retryLabel={t.retry} onError={recheck} />
             </div>
+            {data.watermark && <div class="wmlayer" ref={layerRef} aria-hidden="true" style={{ backgroundImage: sentinelBackground(wm ?? "") }} />}
             <button class="rnav prev" disabled={page <= 1} onClick={() => step(-1)} aria-label={t.prev}><IconChevronLeft size={28} /></button>
             <button class="rnav next" disabled={page >= count} onClick={() => step(1)} aria-label={t.next}><IconChevronRight size={28} /></button>
           </section>
@@ -251,6 +266,7 @@ export function Reader(ctx: Ctx) {
               )}
             </div>
           ))}
+          {data.watermark && <div class="wmlayer" ref={layerRef} aria-hidden="true" style={{ backgroundImage: sentinelBackground(wm ?? "") }} />}
         </div>
       )}
 
@@ -307,7 +323,6 @@ export function Reader(ctx: Ctx) {
           )}
         </span>
       </footer>
-      {data.watermark && <div class="wmlayer" ref={layerRef} aria-hidden="true" style={{ backgroundImage: sentinelBackground(wm ?? "") }} />}
     </div>
   );
 }

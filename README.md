@@ -217,13 +217,15 @@ Full reference: [docs/configuration.md](docs/configuration.md) · Make it yours 
 
 ## 🗺️ Status and roadmap
 
-SendFolio is young (**v0.1**). Docker Compose, plain Node and PostgreSQL are tested in CI on every commit.
+SendFolio is at **v0.2**. Docker Compose, plain Node and PostgreSQL are tested in CI on every commit.
 
 - [x] Docker, Netlify and plain Node deployment · English and Chinese · NDA e-signature · watermarks · follow-up notes
-- [ ] S3-compatible file storage (for multi-replica and managed platforms)
-- [ ] Team members and roles
-- [ ] Data rooms: several documents per link
-- [ ] Webhooks and a Slack / Lark notification option
+- [x] Dark-gallery reader · drag-and-drop upload · link presets · bulk link generator · 1-click preview as visitor
+- [x] In-app branding & reader action button · forwarding detection · version-to-version analytics comparison
+- [x] S3-compatible file storage (Cloudflare R2, AWS S3, Aliyun OSS, MinIO)
+- [x] Team / co-founder admin access
+- [x] Data rooms: several documents per link under one NDA
+- [x] Real-time alerts: Slack, Feishu / Lark and generic webhooks
 - [ ] More languages
 
 Ideas and pull requests are welcome: [CONTRIBUTING.md](CONTRIBUTING.md).

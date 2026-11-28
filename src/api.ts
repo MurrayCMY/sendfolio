@@ -69,6 +69,46 @@ export type LinkInput = Partial<Omit<LinkRow, "id" | "document_id" | "has_passwo
   password?: string;
   clear_password?: boolean;
 };
+export interface BrandingSettings {
+  app_name: string;
+  brand_color: string;
+  logo_url: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+}
+export interface WebhookConfig {
+  id: string;
+  name: string;
+  url: string;
+  kind: "slack" | "lark" | "generic";
+  enabled: boolean;
+}
+export interface AllLinkRow extends LinkRow {
+  room_id?: string | null;
+  doc_title: string;
+  doc_archived: boolean;
+}
+export interface RoomRow {
+  id: string;
+  title: string;
+  description: string | null;
+  archived_at: string | null;
+  created_at: string;
+  doc_count: number;
+  link_count: number;
+  visit_count: number;
+}
+export interface RoomItemRow {
+  id: string;
+  document_id: string;
+  section: string | null;
+  sort_order: number;
+  title: string;
+  archived_at: string | null;
+  version_id: string | null;
+  version_label: string | null;
+  page_count: number | null;
+}
 export interface Overview {
   kpi: { visits_7d: number; visits_prev_7d: number; visitors_7d: number; avg_ms_7d: number; active_links: number; documents: number; nda_7d: number };
   daily: { day: string; n: number }[];
@@ -76,6 +116,7 @@ export interface Overview {
   pending_nda_emails: number;
   followups: { id: string; name: string; email: string; status: string | null; visits: number; total_ms: number; last_at: string; depth: number }[];
   unopened: { id: string; name: string; created_at: string; document_id: string; title: string }[];
+  forwarded?: { id: string; name: string; document_id: string; title: string; visitor_count: number; last_at: string }[];
 }
 export interface NdaListRow {
   id: string;
@@ -181,15 +222,33 @@ export const api = {
   acceptances: () => request<{ acceptances: Acceptance[] }>("nda-acceptances"),
   resendNdaEmail: (id: string) => post<{ ok: true }>(`nda-acceptances/${id}/resend`),
   ndaPdfUrl: (id: string) => `/api/admin/nda-acceptances/${id}/pdf`,
+  allLinks: () => request<{ links: AllLinkRow[] }>("links"),
+  rooms: () => request<{ rooms: RoomRow[] }>("rooms"),
+  room: (id: string) => request<{ room: Omit<RoomRow, "doc_count" | "link_count" | "visit_count">; items: RoomItemRow[]; links: LinkRow[] }>(`rooms/${id}`),
+  createRoom: (title: string, description: string, items: { document_id: string; section?: string }[]) => post<{ id: string }>("rooms", { title, description, items }),
+  updateRoom: (id: string, patchData: { title?: string; description?: string; items?: { document_id: string; section?: string }[] }) => patch<{ ok: true }>(`rooms/${id}`, patchData),
+  archiveRoom: (id: string) => post<{ ok: true }>(`rooms/${id}/archive`),
+  createRoomLink: (roomId: string, input: LinkInput) => post<{ id: string; slug: string }>(`rooms/${roomId}/links`, input),
   links: (docId: string) => request<{ links: LinkRow[] }>(`documents/${docId}/links`),
   createLink: (docId: string, input: LinkInput) => post<{ id: string; slug: string }>(`documents/${docId}/links`, input),
+  createBulkLinks: (docId: string, input: LinkInput & { names: string[] }) => post<{ links: { id: string; name: string; slug: string }[] }>(`documents/${docId}/links/bulk`, input),
   updateLink: (id: string, input: LinkInput) => patch<{ ok: true }>(`links/${id}`, input),
   ndaVersions: () => request<{ versions: NdaListRow[] }>("nda"),
   ndaVersion: (id: string) => request<NdaFull>(`nda/${id}`),
   createNda: (label: string, body_zh: string, body_en: string) => post<{ id: string }>("nda", { label, body_zh, body_en }),
   activateNda: (id: string) => post(`nda/${id}/activate`),
-  settings: () => request<{ personal_email_domains: string[] }>("settings"),
+  settings: () => request<{
+    personal_email_domains: string[];
+    branding: BrandingSettings;
+    webhooks: WebhookConfig[];
+    primary_admins: string[];
+    extra_admins: string[];
+  }>("settings"),
   savePersonalDomains: (domains: string[]) => put<{ ok: true }>("settings/personal-domains", { domains }),
+  saveBranding: (branding: BrandingSettings) => put<{ branding: BrandingSettings }>("settings/branding", branding),
+  saveWebhooks: (webhooks: WebhookConfig[]) => put<{ webhooks: WebhookConfig[] }>("settings/webhooks", { webhooks }),
+  testWebhook: (url: string, kind: WebhookConfig["kind"]) => post<{ ok: boolean; status?: number; error?: string }>("settings/webhooks/test", { url, kind }),
+  saveAdmins: (emails: string[]) => put<{ extra_admins: string[] }>("settings/admins", { emails }),
   overview: () => request<Overview>("overview"),
   deleteLink: (id: string) => request<{ deleted: boolean; visits_deleted: number }>(`links/${id}`, { method: "DELETE" }),
   deleteVisitor: (id: string) => request<{ deleted: boolean; visits_deleted: number; acceptances_deleted: number }>(`visitors/${id}`, { method: "DELETE" }),

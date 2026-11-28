@@ -56,10 +56,27 @@ export function Gate(ctx: Ctx) {
   const askIdentity = info.require_email;
   const willEmail = info.require_otp;
   const errId = `${uid}-err`;
+  const steps = info.require_nda ? [t.stepVerify, t.stepNda, t.stepRead] : [t.stepVerify, t.stepRead];
   return (
     <div class="vpage">
       <header class="vhead"><Brand /><LangToggle lang={lang} setLang={setLang} /></header>
       <main class="vcard narrow">
+        <div class="vsteps" aria-hidden="true">
+          {steps.map((s, i) => (
+            <span key={s} class={`vstep ${i === 0 ? "on" : ""}`}><span class="vstep-num">{i + 1}</span>{s}</span>
+          ))}
+        </div>
+        {info.title && (
+          <div class="vdoc-banner">
+            <div class="vdoc-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+            <div class="vdoc-meta">
+              <b>{info.title}</b>
+              {info.page_count ? <span>{t.pagesN(info.page_count)}</span> : null}
+            </div>
+          </div>
+        )}
         <h1>{t.title}</h1>
         {!pending ? (
           <form onSubmit={start} aria-busy={busy}>

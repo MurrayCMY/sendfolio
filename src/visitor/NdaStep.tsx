@@ -51,16 +51,29 @@ export function NdaStep(ctx: Ctx) {
     await ctx.refresh();
   }
 
+  const jumpToEnd = () => {
+    const el = boxRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  };
+
   return (
     <div class="vpage">
       <header class="vhead"><Brand /><LangToggle lang={lang} setLang={setLang} /></header>
       <main class="vcard">
+        <div class="vsteps" aria-hidden="true">
+          <span class="vstep done"><span class="vstep-num">✓</span>{t.stepVerify}</span>
+          <span class="vstep on"><span class="vstep-num">2</span>{t.stepNda}</span>
+          <span class="vstep"><span class="vstep-num">3</span>{t.stepRead}</span>
+        </div>
         <h1>{t.ndaTitle}</h1>
         <p class="muted">{t.ndaIntro}</p>
         <div class="ndabox" ref={boxRef} onScroll={checkEnd} lang={lang === "zh" ? "zh-CN" : "en"} tabIndex={0}>
           {nda ? <NdaText body={lang === "zh" ? nda.body_zh : nda.body_en} /> : <p class="muted">{t.loading}</p>}
         </div>
-        <p class={`ndahint ${atEnd ? "done" : ""}`} role="status">{atEnd ? t.ndaScrolled : t.ndaScroll}</p>
+        <div class="row between ndabar">
+          <p class={`ndahint ${atEnd ? "done" : ""}`} role="status">{atEnd ? t.ndaScrolled : t.ndaScroll}</p>
+          {nda && !atEnd && <button type="button" class="link small" onClick={jumpToEnd}>{t.ndaJumpEnd}</button>}
+        </div>
         <label class="agree">
           <input type="checkbox" checked={agree} disabled={!nda || !atEnd} onChange={(e) => setAgree(e.currentTarget.checked)} />
           <span>

@@ -21,9 +21,9 @@ export function drawWatermark(ctx: CanvasRenderingContext2D, w: number, h: numbe
   for (let y = -reach / 2; y < reach / 2; y += stepY, row++) {
     const offset = row % 2 ? stepX / 2 : 0;
     for (let x = -reach / 2 - stepX + offset; x < reach / 2; x += stepX) {
-      ctx.fillStyle = "rgba(255,255,255,0.10)"; // light edge so it shows on dark slides
+      ctx.fillStyle = "rgba(255,255,255,0.12)"; // light edge so it shows on dark slides
       ctx.fillText(text, x + 1, y + 1);
-      ctx.fillStyle = "rgba(30,45,40,0.16)"; // dark text for light slides
+      ctx.fillStyle = "rgba(26,33,61,0.12)"; // restrained dark text for light slides
       ctx.fillText(text, x, y);
     }
   }
@@ -32,9 +32,9 @@ export function drawWatermark(ctx: CanvasRenderingContext2D, w: number, h: numbe
 
 const xml = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-/** A faint tiled overlay. It is a tripwire: the guard below notices if it is removed or hidden. */
+/** A faint tiled overlay scoped to the reading stage. It is a tripwire: the guard below notices if it is removed or hidden. */
 export function sentinelBackground(text: string): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="240"><text x="20" y="130" transform="rotate(-30 230 120)" font-family="Jost,sans-serif" font-size="15" fill="rgba(90,100,95,0.07)">${xml(text)}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="520" height="280"><text x="20" y="140" transform="rotate(-30 260 140)" font-family="Jost,sans-serif" font-size="14" fill="rgba(140,152,185,0.03)">${xml(text)}</text></svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 }
 

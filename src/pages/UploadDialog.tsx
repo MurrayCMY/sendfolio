@@ -1,22 +1,43 @@
 import { useEffect, useId, useRef, useState } from "preact/hooks";
 import { api } from "../api";
-import { IconUpload } from "../ui/icons";
+import { IconFile, IconUpload } from "../ui/icons";
 import { Modal } from "../ui/Modal";
 import { t } from "../i18n";
 
+function cleanTitle(filename: string): string {
+  return filename.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+}
+
+function fmtSize(bytes: number): string {
+  return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
 /** Create a new document (docId undefined) or add a new version to an existing one. */
-export function UploadDialog(props: { docId?: string; onClose: () => void; onDone: (docId: string) => void }) {
+export function UploadDialog(props: { docId?: string; nextVersion?: number; onClose: () => void; onDone: (docId: string) => void }) {
   const uid = useId();
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState(`v${props.nextVersion ?? 1}`);
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
   const [fraction, setFraction] = useState(0);
   const [eta, setEta] = useState("");
   const startedAt = useRef(0);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const pickFile = (f: File | null) => {
+    if (!f) return;
+    if (f.type !== "application/pdf" && !f.name.toLowerCase().endsWith(".pdf")) {
+      setError(t("Please choose a PDF file."));
+      return;
+    }
+    setError("");
+    setFile(f);
+    if (!props.docId && !title.trim()) setTitle(cleanTitle(f.name));
+  };
 
   // Leaving the page mid-upload loses the work: warn before the tab closes or reloads.
   useEffect(() => {
@@ -63,18 +84,40 @@ export function UploadDialog(props: { docId?: string; onClose: () => void; onDon
     <Modal labelledBy={`${uid}-t`} busy={busy} onClose={props.onClose}>
       <form class="dform" onSubmit={submit} aria-busy={busy}>
         <h2 id={`${uid}-t`}>{props.docId ? t("Upload new version") : t("New document")}</h2>
+        <div
+          class={`dropzone ${dragging ? "over" : ""} ${file ? "has-file" : ""}`}
+          onDragOver={(e) => { e.preventDefault(); if (!busy) setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => { e.preventDefault(); setDragging(false); if (!busy) pickFile(e.dataTransfer?.files?.[0] ?? null); }}
+          onClick={() => !busy && fileRef.current?.click()}
+        >
+          <input ref={fileRef} id={`${uid}-file`} type="file" accept="application/pdf" class="sr" disabled={busy} onChange={(e) => pickFile(e.currentTarget.files?.[0] ?? null)} />
+          {file ? (
+            <div class="dropzone-file">
+              <span class="dropzone-icon"><IconFile size={20} /></span>
+              <div class="dropzone-meta">
+                <b>{file.name}</b>
+                <span class="muted">{fmtSize(file.size)} · {t("Click or drop to replace")}</span>
+              </div>
+            </div>
+          ) : (
+            <div class="dropzone-empty">
+              <span class="dropzone-icon"><IconUpload size={20} /></span>
+              <b>{t("Drop a PDF here, or click to browse")}</b>
+              <span class="muted">{t("Rendered to images in your browser so recipients never get the raw file.")}</span>
+            </div>
+          )}
+        </div>
         {!props.docId && (
           <>
-            <label for={`${uid}-title`}>{t("Title")}{" "}<span class="req" aria-hidden="true">*</span></label>
-            <input id={`${uid}-title`} required maxLength={200} disabled={busy} value={title} onInput={(e) => setTitle(e.currentTarget.value)} />
-            <label for={`${uid}-note`}>{t("Internal note (optional)")}</label>
+            <label class="login-label" for={`${uid}-title`}>{t("Title")}{" "}<span class="req" aria-hidden="true">*</span></label>
+            <input id={`${uid}-title`} required maxLength={200} placeholder={t("Auto-filled from PDF filename")} disabled={busy} value={title} onInput={(e) => setTitle(e.currentTarget.value)} />
+            <label class="login-label" for={`${uid}-note`}>{t("Internal note (optional)")}</label>
             <textarea id={`${uid}-note`} rows={2} disabled={busy} value={note} onInput={(e) => setNote(e.currentTarget.value)} />
           </>
         )}
-        <label for={`${uid}-ver`}>{t("Version name")}{" "}<span class="req" aria-hidden="true">*</span></label>
+        <label class="login-label" for={`${uid}-ver`}>{t("Version name")}{" "}<span class="req" aria-hidden="true">*</span></label>
         <input id={`${uid}-ver`} required maxLength={60} placeholder={t("e.g. v2")} disabled={busy} value={label} onInput={(e) => setLabel(e.currentTarget.value)} />
-        <label for={`${uid}-file`}>{t("PDF file")}{" "}<span class="req" aria-hidden="true">*</span></label>
-        <input id={`${uid}-file`} type="file" accept="application/pdf" required disabled={busy} onChange={(e) => setFile(e.currentTarget.files?.[0] ?? null)} />
 
         {busy && (
           <div class="progressbox" role="status">

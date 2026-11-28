@@ -3,8 +3,9 @@ import { api, LinkRow, VersionRow } from "../api";
 import { Link } from "../app";
 import { fmtRelative, linkStatus, linkUrl } from "../format";
 import { Badge, EmptyState, Menu, toast } from "../ui/kit";
-import { IconCopy, IconEdit, IconLink, IconPlus, IconTrash } from "../ui/icons";
+import { IconAlert, IconCopy, IconEdit, IconEye, IconLink, IconPlus, IconTrash } from "../ui/icons";
 import { Modal } from "../ui/Modal";
+import { BulkLinkDialog } from "./AllLinks";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { LinkDialog } from "./LinkDialog";
 import { t } from "../i18n";
@@ -25,6 +26,7 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
   const [links, setLinks] = useState<LinkRow[] | null>(null);
   const [error, setError] = useState("");
   const [dialog, setDialog] = useState<{ mode: "create" | "edit" | "clone"; link?: LinkRow } | null>(null);
+  const [bulking, setBulking] = useState(false);
   const [disabling, setDisabling] = useState<LinkRow | null>(null);
   const [deleting, setDeleting] = useState<LinkRow | null>(null);
   const [busy, setBusy] = useState(false);
@@ -38,7 +40,12 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
     <>
       <div class="panel-head" style={{ padding: "16px 20px" }}>
         <h2>{t("Personal links")}</h2>
-        {!archived && <button class="btn btn-primary btn-sm" onClick={() => setDialog({ mode: "create" })}><IconPlus size={15} />{" "}{t("New link")}</button>}
+        {!archived && (
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button class="btn btn-sm" onClick={() => setBulking(true)}>{t("Bulk create")}</button>
+            <button class="btn btn-primary btn-sm" onClick={() => setDialog({ mode: "create" })}><IconPlus size={15} />{" "}{t("New link")}</button>
+          </div>
+        )}
       </div>
       {error && <p class="field-error" role="alert" style={{ padding: "0 20px" }}>{error}</p>}
       {links && links.length === 0 && (
@@ -57,7 +64,10 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
                 return (
                   <tr key={l.id}>
                     <td>
-                      <Link href={`/admin/links/${l.id}`}><b>{l.name}</b></Link>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                        <Link href={`/admin/links/${l.id}`}><b>{l.name}</b></Link>
+                        {l.visitor_count > 1 && <Badge tone="warn" icon={<IconAlert size={12} />}>{t("Forwarded")}</Badge>}
+                      </div>
                       <span class="cell-sub">
                         {l.pinned_version_id ? t("Pinned version · ") : ""}{l.has_password ? t("Password · ") : ""}{l.allow_download ? t("Downloadable · ") : ""}{l.watermark ? t("Watermarked") : t("No watermark")}
                       </span>
@@ -75,6 +85,7 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
                     <td class="actions">
                       <Menu label={t("More actions for “{0}”", l.name)} items={[
                         { label: t("Copy link"), icon: <IconCopy size={16} />, onClick: () => copyLink(l.slug, setManualUrl) },
+                        { label: t("Preview as visitor"), icon: <IconEye size={16} />, onClick: () => window.open(`/${l.slug}?preview=1`, "_blank", "noopener"), disabled: archived || !l.enabled },
                         { label: t("Edit"), icon: <IconEdit size={16} />, onClick: () => setDialog({ mode: "edit", link: l }), disabled: archived },
                         { label: t("New from these settings"), icon: <IconPlus size={16} />, onClick: () => setDialog({ mode: "clone", link: l }), disabled: archived },
                         { label: l.enabled ? t("Disable") : t("Enable"), onClick: async () => { if (l.enabled) setDisabling(l); else { await api.updateLink(l.id, { enabled: true }); toast(t("Link has been enabled")); changed(); } }, disabled: archived, divider: false },
@@ -93,6 +104,7 @@ export function Links({ docId, versions, archived, onChanged }: { docId: string;
         <LinkDialog docId={docId} versions={versions} mode={dialog.mode} initial={dialog.link}
           onClose={() => setDialog(null)} onDone={() => { setDialog(null); changed(); }} />
       )}
+      {bulking && <BulkLinkDialog docId={docId} onClose={() => setBulking(false)} onDone={changed} />}
       {disabling && (
         <ConfirmDialog
           title={t("Disable “{0}”?", disabling.name)}

@@ -14,8 +14,8 @@ export async function recentVisits(): Promise<Response> {
            l.id as link_id, l.name as link_name, d.id as document_id, d.title, dv.version_label, dv.page_count
     from visits v
     join links l on l.id = v.link_id
-    join documents d on d.id = l.document_id
     join document_versions dv on dv.id = v.version_id
+    join documents d on d.id = dv.document_id
     left join visitors vis on vis.id = v.visitor_id
     order by v.started_at desc limit 20`;
   return json({ visits: rows.map((r) => ({ ...r, total_active_ms: num(r.total_active_ms) })) });
@@ -119,6 +119,18 @@ export async function overview(): Promise<Response> {
       and l.created_at < now() - interval '3 days'
       and not exists (select 1 from visits v where v.link_id = l.id)
     order by l.created_at limit 5`;
+  // Links opened by more than one distinct verified person (possible forward).
+  const forwarded = await db.sql<Row>`
+    select l.id, l.name, l.document_id, d.title,
+           count(distinct v.visitor_id)::int as visitor_count,
+           max(v.started_at) as last_at
+    from links l
+    join documents d on d.id = l.document_id
+    join visits v on v.link_id = l.id and v.visitor_id is not null
+    where d.archived_at is null
+    group by l.id, d.title
+    having count(distinct v.visitor_id) > 1
+    order by max(v.started_at) desc limit 5`;
   return json({
     kpi: { ...k, avg_ms_7d: num(k.avg_ms_7d) },
     daily,
@@ -126,6 +138,7 @@ export async function overview(): Promise<Response> {
     pending_nda_emails: pending.n,
     followups: followups.map((r) => ({ ...r, total_ms: num(r.total_ms), depth: Number(r.depth) })),
     unopened,
+    forwarded,
   });
 }
 

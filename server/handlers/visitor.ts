@@ -1,7 +1,7 @@
 import { config, pickLocale } from "../lib/config";
 import type { Ctx } from "../lib/ctx";
 import { files } from "../lib/storage";
-import { readVisitor, signToken, verifyPassword, verifyToken, visitorCookie } from "../lib/auth";
+import { isAdmin, readVisitor, signToken, verifyPassword, verifyToken, visitorCookie } from "../lib/auth";
 import { db } from "../lib/db";
 import { visitorOtpMail } from "../lib/emails";
 import { binary, fail, json, sameOrigin, UUID_RE } from "../lib/http";
@@ -14,6 +14,7 @@ import { sendNdaEmail } from "../lib/nda-sign";
 import { watermarkPdf } from "../lib/watermark-pdf";
 import { buildWatermark } from "../lib/watermark-text";
 import { notifyOpen } from "../lib/notify";
+import { getBranding } from "../lib/settings";
 import { overLimit, record } from "../lib/ratelimit";
 import { parseUserAgent } from "../lib/ua";
 import { migrate } from "../lib/migrate";
@@ -54,16 +55,47 @@ async function startSession(link: LinkRow, vid: string | null, email: string | n
   return json({ step: next }, 200, { "set-cookie": visitorCookie(link.slug, { lid: link.id, vid, email, name }) });
 }
 
+const isAdminPreview = (req: Request) => new URL(req.url).searchParams.get("preview") === "1" && isAdmin(req);
+
 async function handleInfo(req: Request, link: LinkRow): Promise<Response> {
+  const isRoom = !!link.room_id;
+  const ver = isRoom ? null : await resolveVersion(link);
+  const docCount = isRoom
+    ? (await db.sql<{ n: number }>`
+        select count(*)::int as n from data_room_items i join documents d on d.id = i.document_id
+        where i.room_id = ${link.room_id} and d.archived_at is null`)[0]?.n ?? 0
+    : null;
+  if (isAdminPreview(req)) {
+    return json({
+      status: "ok",
+      title: link.doc_title,
+      page_count: ver?.page_count ?? null,
+      is_room: isRoom,
+      room_description: link.room_description ?? null,
+      doc_count: docCount,
+      step: "read",
+      preview: true,
+      require_email: link.require_email,
+      require_otp: link.require_otp,
+      require_password: !!link.password_hash,
+      require_nda: link.require_nda,
+      visitor: { name: "Jane Doe (Preview)", email: config.adminEmail() || "preview@example.com" },
+    });
+  }
   const s = readVisitor(req, link.slug, link.id);
   const step = !s ? "identity" : link.require_nda && s.vid && (await needsNda(s.vid)) ? "nda" : "read";
   return json({
     status: "ok",
     title: link.doc_title,
+    page_count: ver?.page_count ?? null,
+    is_room: isRoom,
+    room_description: link.room_description ?? null,
+    doc_count: docCount,
     step,
     require_email: link.require_email,
     require_otp: link.require_otp,
     require_password: !!link.password_hash,
+    require_nda: link.require_nda,
     visitor: s ? { name: s.name, email: s.email } : null,
   });
 }
@@ -150,24 +182,102 @@ async function handleAccept(req: Request, ctx: Ctx, link: LinkRow): Promise<Resp
   return json({ step: "read" });
 }
 
+async function resolveRoomDoc(roomId: string, docId: string) {
+  if (!UUID_RE.test(docId)) return null;
+  const [row] = await db.sql<{ id: string; title: string; version_id: string; version_label: string; page_count: number }>`
+    select d.id, d.title, dv.id as version_id, dv.version_label, dv.page_count
+    from data_room_items i
+    join documents d on d.id = i.document_id and d.archived_at is null
+    join lateral (
+      select id, version_label, page_count from document_versions
+      where document_id = d.id and status = 'ready' order by created_at desc limit 1
+    ) dv on true
+    where i.room_id = ${roomId} and d.id = ${docId}`;
+  return row ?? null;
+}
+
+async function handleRoom(req: Request, link: LinkRow): Promise<Response> {
+  if (!link.room_id) return err(404, "invalid", "Not a data room");
+  if (!isAdminPreview(req)) {
+    const s = readVisitor(req, link.slug, link.id);
+    if (!s || (link.require_email && !s.vid)) return err(401, "auth", "Please verify your identity first.");
+    if (link.require_nda && s.vid && (await needsNda(s.vid))) return err(403, "nda", "Please accept the NDA first.");
+  }
+  const docs = await db.sql<{ id: string; title: string; section: string | null; version_id: string; version_label: string; page_count: number }>`
+    select d.id, d.title, i.section, dv.id as version_id, dv.version_label, dv.page_count
+    from data_room_items i
+    join documents d on d.id = i.document_id and d.archived_at is null
+    join lateral (
+      select id, version_label, page_count from document_versions
+      where document_id = d.id and status = 'ready' order by created_at desc limit 1
+    ) dv on true
+    where i.room_id = ${link.room_id}
+    order by i.sort_order, i.created_at`;
+  return json({ title: link.room_title ?? link.doc_title, description: link.room_description ?? null, preview: isAdminPreview(req), documents: docs });
+}
+
+async function handleRoomThumb(req: Request, link: LinkRow, docId?: string): Promise<Response> {
+  if (!link.room_id || !docId) return err(404, "invalid", "Not found");
+  if (!isAdminPreview(req)) {
+    const s = readVisitor(req, link.slug, link.id);
+    if (!s || (link.require_email && !s.vid)) return err(401, "auth", "Please verify your identity first.");
+    if (link.require_nda && s.vid && (await needsNda(s.vid))) return err(403, "nda", "Please accept the NDA first.");
+  }
+  const doc = await resolveRoomDoc(link.room_id, docId);
+  if (!doc) return err(404, "invalid", "Not found");
+  const img = await files().get(`thumbs/${doc.version_id}/1.webp`, { type: "arrayBuffer" });
+  if (!img) return err(404, "invalid", "Not found");
+  return binary(img, "image/webp");
+}
+
 async function handleOpen(req: Request, ctx: Ctx, link: LinkRow): Promise<Response> {
+  const body = await readJson(req);
+  const reqDocId = typeof body.document_id === "string" ? body.document_id : "";
+
+  if (isAdminPreview(req)) {
+    const roomDoc = link.room_id && reqDocId ? await resolveRoomDoc(link.room_id, reqDocId) : null;
+    const version = roomDoc
+      ? { id: roomDoc.version_id, version_label: roomDoc.version_label, page_count: roomDoc.page_count }
+      : await resolveVersion(link);
+    if (!version) return err(404, "invalid", "The file is unavailable.");
+    const previewEmail = config.adminEmail() || "preview@example.com";
+    return json({
+      visit_id: "preview",
+      preview: true,
+      document_id: roomDoc?.id ?? link.document_id,
+      title: roomDoc?.title ?? link.doc_title,
+      version_label: version.version_label,
+      page_count: version.page_count,
+      name: "Jane Doe",
+      email: previewEmail,
+      watermark: buildWatermark(link, { name: "Jane Doe", email: previewEmail, ip: ctx.ip ?? null }, new Date()),
+      allow_download: false,
+    });
+  }
   const s = readVisitor(req, link.slug, link.id);
   if (!s) return err(401, "auth", "Please verify your identity first.");
   if (link.require_email && !s.vid) return err(401, "auth", "Please verify your identity first.");
   if (link.require_nda && s.vid && (await needsNda(s.vid))) return err(403, "nda", "Please accept the NDA first.");
   const ua = (req.headers.get("user-agent") ?? "").slice(0, 500);
 
+  const roomDoc = link.room_id && reqDocId ? await resolveRoomDoc(link.room_id, reqDocId) : null;
+  if (link.room_id && reqDocId && !roomDoc) return err(404, "invalid", "The file is unavailable.");
+  const targetDocId = roomDoc?.id ?? link.document_id;
+
   // A visit continues until 15 minutes pass without a heartbeat. Reloading or reopening within that
-  // window (same person, same device) resumes it; anything later starts a new visit.
+  // window (same person, same device, same document) resumes it; anything later starts a new visit.
   const [open] = await db.sql<{ id: string; version_id: string }>`
-    select id, version_id from visits
-    where link_id = ${link.id} and visitor_id is not distinct from ${s.vid}::uuid and user_agent = ${ua}
-      and coalesce(last_heartbeat_at, started_at) > now() - interval '15 minutes'
-    order by started_at desc limit 1`;
+    select v.id, v.version_id from visits v join document_versions dv on dv.id = v.version_id
+    where v.link_id = ${link.id} and dv.document_id = ${targetDocId}
+      and v.visitor_id is not distinct from ${s.vid}::uuid and v.user_agent = ${ua}
+      and coalesce(v.last_heartbeat_at, v.started_at) > now() - interval '15 minutes'
+    order by v.started_at desc limit 1`;
   let version = open
     ? (await db.sql<{ id: string; version_label: string; page_count: number }>`
         select id, version_label, page_count from document_versions where id = ${open.version_id}`)[0]
-    : await resolveVersion(link);
+    : roomDoc
+      ? { id: roomDoc.version_id, version_label: roomDoc.version_label, page_count: roomDoc.page_count }
+      : await resolveVersion(link);
   if (!version) return err(404, "invalid", "The file is unavailable.");
 
   let visitId = open?.id;
@@ -183,7 +293,8 @@ async function handleOpen(req: Request, ctx: Ctx, link: LinkRow): Promise<Respon
   }
   return json({
     visit_id: visitId,
-    title: link.doc_title,
+    document_id: targetDocId,
+    title: roomDoc?.title ?? link.doc_title,
     version_label: version.version_label,
     page_count: version.page_count,
     name: s.name,
@@ -275,9 +386,21 @@ async function handleDownload(req: Request, ctx: Ctx, link: LinkRow, visitId?: s
 
 /** Page images and thumbnails: every request re-checks session, link state and document state. */
 async function handleImage(req: Request, link: LinkRow, kind: "pages" | "thumbs", visitId?: string, n?: string) {
-  const s = readVisitor(req, link.slug, link.id);
   const page = Number(n);
-  if (!s || !visitId || !UUID_RE.test(visitId) || !Number.isInteger(page) || page < 1) return err(404, "invalid", "Not found");
+  if (!Number.isInteger(page) || page < 1) return err(404, "invalid", "Not found");
+  if (visitId === "preview" && isAdminPreview(req)) {
+    const docParam = new URL(req.url).searchParams.get("doc") ?? "";
+    const roomDoc = link.room_id && docParam ? await resolveRoomDoc(link.room_id, docParam) : null;
+    const version = roomDoc
+      ? { id: roomDoc.version_id, page_count: roomDoc.page_count }
+      : await resolveVersion(link);
+    if (!version || page > version.page_count) return err(404, "invalid", "Not found");
+    const img = await files().get(`${kind}/${version.id}/${page}.webp`, { type: "arrayBuffer" });
+    if (!img) return err(404, "invalid", "Not found");
+    return binary(img, "image/webp");
+  }
+  const s = readVisitor(req, link.slug, link.id);
+  if (!s || !visitId || !UUID_RE.test(visitId)) return err(404, "invalid", "Not found");
   const [visit] = await db.sql<{ version_id: string; visitor_id: string | null }>`
     select version_id, visitor_id from visits where id = ${visitId} and link_id = ${link.id}`;
   if (!visit || (visit.visitor_id ?? null) !== (s.vid ?? null)) return err(404, "invalid", "Not found");
@@ -292,8 +415,17 @@ export default async (req: Request, ctx: Ctx): Promise<Response> => {
     const [slug, action, a, b] = new URL(req.url).pathname.replace(/^\/api\/v\//, "").split("/").filter(Boolean);
     const m = req.method;
     if (slug === "_" && action === "config" && m === "GET") {
-      // Public, non-sensitive settings every page needs before anything else (brand name, language, time zone).
-      return json({ app_name: config.appName, default_locale: config.defaultLocale, timezone: config.timezone });
+      // Public, non-sensitive settings every page needs before anything else (branding, language, time zone).
+      const b = await getBranding();
+      return json({
+        app_name: b.app_name,
+        brand_color: b.brand_color,
+        logo_url: b.logo_url,
+        cta_label: b.cta_label,
+        cta_url: b.cta_url,
+        default_locale: config.defaultLocale,
+        timezone: config.timezone,
+      });
     }
     const link = slug ? await loadLinkBySlug(slug) : null;
 
@@ -302,6 +434,8 @@ export default async (req: Request, ctx: Ctx): Promise<Response> => {
     }
 
     if (action === "info" && m === "GET") return await handleInfo(req, link);
+    if (action === "room" && m === "GET") return await handleRoom(req, link);
+    if (action === "room-thumb" && m === "GET") return await handleRoomThumb(req, link, a);
     if (action === "start" && m === "POST") return await handleStart(req, ctx, link);
     if (action === "verify" && m === "POST") return await handleVerify(req, ctx, link);
     if (action === "nda" && m === "GET") return await handleNda(req, link);

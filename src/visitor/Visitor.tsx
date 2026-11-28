@@ -6,6 +6,7 @@ import { Dict, Lang, useLang } from "./i18n";
 import { Gate } from "./Gate";
 import { NdaStep } from "./NdaStep";
 import { Reader } from "./Reader";
+import { RoomHub } from "./RoomHub";
 
 export interface Ctx {
   slug: string;
@@ -91,7 +92,7 @@ export function Visitor({ slug }: { slug: string }) {
   if (!info) return <Splash t={t} lang={lang} setLang={setLang} />;
 
   const ctx: Ctx = { slug, info, lang, setLang, t, refresh, invalidate: () => setInvalid(true) };
-  if (info.step === "read") return <Reader {...ctx} />;
+  if (info.step === "read") return info.is_room ? <RoomHub {...ctx} /> : <Reader {...ctx} />;
   if (info.step === "nda") return <NdaStep {...ctx} />;
   if (!info.require_email && !info.require_password) return <Splash t={t} lang={lang} setLang={setLang} />;
   return <Gate {...ctx} />;

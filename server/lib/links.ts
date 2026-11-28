@@ -19,6 +19,7 @@ export const newSlug = (len = 10) =>
 export interface LinkRow {
   id: string;
   document_id: string;
+  room_id: string | null;
   pinned_version_id: string | null;
   slug: string;
   name: string;
@@ -37,23 +38,30 @@ export interface LinkRow {
   notify_on_open: boolean;
   doc_title: string;
   doc_archived_at: string | null;
+  room_title: string | null;
+  room_description: string | null;
+  room_archived_at: string | null;
 }
 
 export async function loadLinkBySlug(slug: string): Promise<LinkRow | null> {
   if (!SLUG_RE.test(slug)) return null;
   const [row] = await db.sql<LinkRow>`
-    select l.id, l.document_id, l.pinned_version_id, l.slug, l.name, l.enabled, l.expires_at,
+    select l.id, l.document_id, l.room_id, l.pinned_version_id, l.slug, l.name, l.enabled, l.expires_at,
            l.require_email, l.require_otp, l.block_personal_email, l.allowed_domains, l.require_nda,
            l.password_hash, l.allow_download, l.watermark, l.watermark_fields, l.watermark_text, l.notify_on_open,
-           d.title as doc_title, d.archived_at as doc_archived_at
-    from links l join documents d on d.id = l.document_id
+           coalesce(r.title, d.title) as doc_title, d.archived_at as doc_archived_at,
+           r.title as room_title, r.description as room_description, r.archived_at as room_archived_at
+    from links l
+    join documents d on d.id = l.document_id
+    left join data_rooms r on r.id = l.room_id
     where lower(l.slug) = lower(${slug})`;
   return row ?? null;
 }
 
-/** Disabled, expired and archived-document links all look the same to visitors. */
+/** Disabled, expired and archived-document/room links all look the same to visitors. */
 export function linkUsable(l: LinkRow): boolean {
-  return l.enabled && !l.doc_archived_at && (!l.expires_at || new Date(l.expires_at) > new Date());
+  const archived = l.room_id ? !!l.room_archived_at : !!l.doc_archived_at;
+  return l.enabled && !archived && (!l.expires_at || new Date(l.expires_at) > new Date());
 }
 
 export async function resolveVersion(l: LinkRow) {

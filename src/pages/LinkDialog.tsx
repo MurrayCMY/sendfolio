@@ -1,11 +1,13 @@
 import { useId, useState } from "preact/hooks";
 import { api, LinkInput, LinkRow, VersionRow } from "../api";
+import { linkUrl } from "../format";
 import { Modal } from "../ui/Modal";
 import { Field, Switch, toast } from "../ui/kit";
 import { IconCheck, IconPlus, IconRefresh } from "../ui/icons";
 import { t } from "../i18n";
 
 type Mode = "create" | "edit" | "clone";
+type PresetId = "diligence" | "pitch" | "teaser";
 
 const toLocalInput = (iso: string | null) => {
   if (!iso) return "";
@@ -26,7 +28,8 @@ const randomSlug = () => Array.from(crypto.getRandomValues(new Uint8Array(10)), 
 
 /** Create a link, edit one, or create a new one from an existing link's settings ("clone"). */
 export function LinkDialog(props: {
-  docId: string;
+  docId?: string;
+  roomId?: string;
   versions: VersionRow[];
   mode: Mode;
   initial?: LinkRow;
@@ -53,8 +56,20 @@ export function LinkDialog(props: {
   const [wmText, setWmText] = useState(i?.watermark_text ?? "");
   const [notify, setNotify] = useState(i?.notify_on_open ?? true);
   const [enabled, setEnabled] = useState(i?.enabled ?? true);
+  const [preset, setPreset] = useState<PresetId | null>(props.mode === "create" ? "diligence" : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const applyPreset = (p: PresetId) => {
+    setPreset(p);
+    if (p === "diligence") {
+      setRequireEmail(true); setRequireOtp(true); setBlockPersonal(true); setRequireNda(true); setWatermark(true); setAllowDownload(false); setNotify(true);
+    } else if (p === "pitch") {
+      setRequireEmail(true); setRequireOtp(true); setBlockPersonal(false); setRequireNda(false); setWatermark(true); setAllowDownload(false); setNotify(true);
+    } else {
+      setRequireEmail(false); setRequireOtp(false); setBlockPersonal(false); setRequireNda(false); setWatermark(false); setAllowDownload(false); setNotify(true);
+    }
+  };
 
   const toggleField = (id: string) => setWmFields((cur) => {
     let next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
@@ -90,9 +105,17 @@ export function LinkDialog(props: {
     if (password) input.password = password;
     if (editing && clearPassword) input.clear_password = true;
     try {
-      if (editing && i) await api.updateLink(i.id, input);
-      else await api.createLink(props.docId, input);
-      toast(editing ? t("Link settings saved") : t("Link created"));
+      if (editing && i) {
+        await api.updateLink(i.id, input);
+        toast(t("Link settings saved"));
+      } else {
+        const created = props.roomId
+          ? await api.createRoomLink(props.roomId, input)
+          : await api.createLink(props.docId!, input);
+        let copied = false;
+        try { await navigator.clipboard.writeText(linkUrl(created.slug)); copied = true; } catch { /* clipboard optional */ }
+        toast(copied ? t("Link created and copied") : t("Link created"));
+      }
       props.onDone();
     } catch (err) {
       setError((err as Error).message);
@@ -111,6 +134,26 @@ export function LinkDialog(props: {
           {(id) => <input id={id} data-autofocus required maxLength={120} placeholder={t("e.g. Acme Ventures – Jane Doe")} value={name} onInput={(e) => setName(e.currentTarget.value)} />}
         </Field>
 
+        {props.mode === "create" && (
+          <div class="field">
+            <label>{t("Security preset")}</label>
+            <div class="preset-grid" role="radiogroup" aria-label={t("Security preset")}>
+              <button type="button" role="radio" aria-checked={preset === "diligence"} class={`preset-card ${preset === "diligence" ? "on" : ""}`} onClick={() => applyPreset("diligence")}>
+                <b>{t("Confidential diligence")}</b>
+                <span>{t("Work email · Email code · NDA · Watermark")}</span>
+              </button>
+              <button type="button" role="radio" aria-checked={preset === "pitch"} class={`preset-card ${preset === "pitch" ? "on" : ""}`} onClick={() => applyPreset("pitch")}>
+                <b>{t("Investor pitch")}</b>
+                <span>{t("Email · Email code · Watermark · No NDA")}</span>
+              </button>
+              <button type="button" role="radio" aria-checked={preset === "teaser"} class={`preset-card ${preset === "teaser" ? "on" : ""}`} onClick={() => applyPreset("teaser")}>
+                <b>{t("Open teaser")}</b>
+                <span>{t("Instant view · No sign-in · Tracked")}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         <Field label={t("Link address")} hint={editing ? t("The old address stops working immediately once you change this. Send the new address to the recipient again.") : t("Leave empty for a random code, or choose your own, e.g. acme. Letters, numbers, hyphens and underscores only.")}
           error={guessable ? t("A custom address is easy to guess. Keep “Email verification code” on, or set an access password.") : undefined}>
           {(id, d) => (
@@ -125,6 +168,9 @@ export function LinkDialog(props: {
           )}
         </Field>
 
+        <details class="adv-details" open={props.mode !== "create"}>
+          <summary>{t("Advanced security, watermark & expiry settings")}</summary>
+          <div class="adv-body">
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
           <Field label={t("Document version")}>
             {(id) => (
@@ -147,7 +193,7 @@ export function LinkDialog(props: {
           <Switch label={t("Require NDA acceptance")} checked={requireNda} disabled={!requireEmail} onChange={setRequireNda} />
         </fieldset>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-          <Field label={t("Allowed email domains (optional)")} hint={t("Empty means no limit; separate several with commas")}>
+          <Field label={t("Only allow specific companies (optional)")} hint={t("Leave empty for anyone, or enter company domains like sequoia.com, a16z.com")}>
             {(id, d) => <input id={id} aria-describedby={d} disabled={!requireEmail} placeholder="acme.com, partner.org" value={domains} onInput={(e) => setDomains(e.currentTarget.value)} />}
           </Field>
           <Field label={`${t("Access password (optional)")}${editing && i?.has_password ? " " + t("· set") : ""}`} hint={editing && i?.has_password ? t("Leave empty to keep it unchanged") : undefined}>
@@ -186,11 +232,13 @@ export function LinkDialog(props: {
           <Switch label={t("Notify me on open")} hint={t("Email me when someone opens the link, and a reading summary after they finish")} checked={notify} onChange={setNotify} />
           {editing && <Switch label={t("Link enabled")} hint={t("Turning it off disables the link; people already reading lose access on their next page turn")} checked={enabled} onChange={setEnabled} />}
         </fieldset>
+          </div>
+        </details>
 
         {error && <p class="field-error" role="alert">{error}</p>}
         <div class="dialog-foot">
           <button type="button" class="btn" disabled={busy} onClick={props.onClose}>{t("Cancel")}</button>
-          <button class="btn btn-primary" disabled={busy}>{busy ? t("Saving…") : editing ? <><IconCheck size={16} />{" "}{t("Save")}</> : <><IconPlus size={16} />{" "}{t("Create link")}</>}</button>
+          <button class="btn btn-primary" disabled={busy}>{busy ? t("Saving…") : editing ? <><IconCheck size={16} />{" "}{t("Save")}</> : <><IconPlus size={16} />{" "}{t("Create & copy link")}</>}</button>
         </div>
       </form>
     </Modal>
