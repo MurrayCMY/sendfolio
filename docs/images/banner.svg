@@ -1,46 +1,69 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-label="SendFolio: see who reads your documents, page by page">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#141a33"/>
-      <stop offset="1" stop-color="#3949ab"/>
+      <stop offset="0" stop-color="#111112"/>
+      <stop offset="1" stop-color="#19191b"/>
     </linearGradient>
-    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0" stop-color="#8f9bea"/>
-      <stop offset="1" stop-color="#d7dcff"/>
-    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
   </defs>
-  <rect width="1280" height="360" rx="22" fill="url(#bg)"/>
-  <circle cx="1130" cy="40" r="210" fill="#ffffff" opacity=".06"/>
-  <circle cx="1230" cy="330" r="150" fill="#ffffff" opacity=".05"/>
 
-  <!-- mark -->
-  <g transform="translate(88 78) scale(2.6)" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- obsidian architectural ground -->
+  <rect width="1280" height="360" rx="18" fill="url(#bg)"/>
+  <rect width="1280" height="360" rx="18" fill="url(#grid)"/>
+  <rect x="0.75" y="0.75" width="1278.5" height="358.5" rx="17.25" fill="none" stroke="#ffffff" stroke-opacity="0.10" stroke-width="1.5"/>
+
+  <!-- editorial top eyebrow -->
+  <rect x="76" y="48" width="178" height="26" rx="4" fill="#ffffff" fill-opacity="0.07" stroke="#ffffff" stroke-opacity="0.14"/>
+  <text x="165" y="65" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="600" letter-spacing="1.6" fill="#d4d2cb">OPEN-SOURCE · v0.3</text>
+
+  <!-- brand mark + wordmark -->
+  <rect x="76" y="96" width="52" height="52" rx="11" fill="#f6f5f1"/>
+  <g transform="translate(86 106) scale(1.0)" fill="none" stroke="#141413" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
     <path d="M9 4h10l6 6v16a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/>
     <path d="M19 4v6h6"/>
     <path d="M11.5 17h9M11.5 21.5h6"/>
   </g>
-  <text x="196" y="150" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="74" font-weight="700" fill="#ffffff" letter-spacing="-1">SendFolio</text>
-  <text x="90" y="226" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="500" fill="#e3e7ff">See who reads your documents,</text>
-  <text x="90" y="268" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="32" font-weight="500" fill="#e3e7ff">page by page.</text>
-  <text x="90" y="318" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="19" fill="#aab3e8">Free · Self-hosted · Open source · English &amp; 简体中文</text>
+  <text x="146" y="140" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="56" font-weight="600" fill="#ffffff" letter-spacing="-1.8">SendFolio</text>
 
-  <!-- heat-map motif -->
-  <g transform="translate(760 70)">
-    <rect x="0" y="0" width="450" height="226" rx="16" fill="#ffffff" opacity=".10"/>
-    <g>
-      <rect x="34"  y="104" width="38" height="86"  rx="6" fill="url(#bar)" opacity=".75"/>
-      <rect x="86"  y="84"  width="38" height="106" rx="6" fill="url(#bar)" opacity=".8"/>
-      <rect x="138" y="116" width="38" height="74"  rx="6" fill="url(#bar)" opacity=".75"/>
-      <rect x="190" y="42"  width="38" height="148" rx="6" fill="url(#bar)"/>
-      <rect x="242" y="96"  width="38" height="94"  rx="6" fill="url(#bar)" opacity=".8"/>
-      <rect x="294" y="132" width="38" height="58"  rx="6" fill="url(#bar)" opacity=".7"/>
-      <rect x="346" y="150" width="38" height="40"  rx="6" fill="url(#bar)" opacity=".65"/>
-      <rect x="398" y="164" width="22" height="26"  rx="6" fill="url(#bar)" opacity=".6"/>
-    </g>
-    <text x="34" y="34" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="600" fill="#ffffff">Time on each page</text>
-    <g font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" fill="#c6ccf5" text-anchor="middle">
-      <text x="53" y="212">1</text><text x="105" y="212">2</text><text x="157" y="212">3</text><text x="209" y="212">4</text>
-      <text x="261" y="212">5</text><text x="313" y="212">6</text><text x="365" y="212">7</text><text x="409" y="212">8</text>
+  <!-- headline -->
+  <text x="76" y="206" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="28" font-weight="400" fill="#e5e3dc" letter-spacing="-0.4">See who reads your documents,</text>
+  <text x="76" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="28" font-weight="400" fill="#a8a59b" letter-spacing="-0.4">page by page — on your own server.</text>
+
+  <!-- subtle spec line -->
+  <line x1="76" y1="280" x2="640" y2="280" stroke="#ffffff" stroke-opacity="0.10" stroke-width="1"/>
+  <text x="76" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="500" fill="#8e8b82" letter-spacing="0.4">Data Rooms  ·  NDA E-Signature  ·  Dynamic Watermarks  ·  Slack &amp; Feishu Alerts  ·  EN / 中文</text>
+
+  <!-- warm paper architectural analytics card -->
+  <g transform="translate(756 46)">
+    <rect x="0" y="0" width="456" height="268" rx="12" fill="#f6f5f1"/>
+    <rect x="0" y="0" width="456" height="4" rx="2" fill="#141413"/>
+
+    <!-- card header -->
+    <text x="24" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="600" letter-spacing="1.2" fill="#6e6b63">PAGE ENGAGEMENT · SEED DECK</text>
+    <rect x="352" y="18" width="80" height="22" rx="4" fill="#ecfdf5"/>
+    <text x="392" y="33" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#166534">86% reach</text>
+    <line x1="24" y1="50" x2="432" y2="50" stroke="#e5e3dc" stroke-width="1"/>
+
+    <!-- clean hairline bars -->
+    <g transform="translate(24 68)">
+      <rect x="0"   y="78"  width="38" height="72"  rx="3" fill="#d7d4cb"/>
+      <rect x="52"  y="94"  width="38" height="56"  rx="3" fill="#d7d4cb"/>
+      <rect x="104" y="98"  width="38" height="52"  rx="3" fill="#d7d4cb"/>
+      <!-- peak bar in obsidian ink -->
+      <rect x="156" y="18"  width="38" height="132" rx="3" fill="#141413"/>
+      <text x="175" y="11" text-anchor="middle" font-family="ui-monospace, Consolas, monospace" font-size="11" font-weight="600" fill="#141413">56s</text>
+      <rect x="208" y="102" width="38" height="48"  rx="3" fill="#d7d4cb"/>
+      <rect x="260" y="128" width="38" height="22"  rx="3" fill="#e5e3dc"/>
+      <rect x="312" y="126" width="38" height="24"  rx="3" fill="#e5e3dc"/>
+      <rect x="364" y="132" width="38" height="18"  rx="3" fill="#e5e3dc"/>
+      <line x1="0" y1="150" x2="402" y2="150" stroke="#e5e3dc" stroke-width="1"/>
+      <g font-family="ui-monospace, Consolas, monospace" font-size="11" fill="#6e6b63" text-anchor="middle">
+        <text x="19" y="168">01</text><text x="71" y="168">02</text><text x="123" y="168">03</text>
+        <text x="175" y="168" fill="#141413" font-weight="700">04</text>
+        <text x="227" y="168">05</text><text x="279" y="168">06</text><text x="331" y="168">07</text><text x="383" y="168">08</text>
+      </g>
     </g>
   </g>
 </svg>

@@ -166,8 +166,8 @@
 /* ---------- document & data room cards ---------- */
 .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
 .search { position: relative; flex: 1 1 240px; min-width: 200px; max-width: 400px; }
-.search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--a-muted); }
-.search input { width: 100%; height: 36px; padding: 0 12px 0 34px; border: 1px solid var(--a-border-strong); border-radius: var(--a-r); background: var(--a-surface); font: inherit; color: var(--a-ink); }
+.search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--a-muted); pointer-events: none; }
+.admin .search input { width: 100%; height: 36px; min-height: 36px; padding: 0 12px 0 36px; border: 1px solid var(--a-border-strong); border-radius: var(--a-r); background: var(--a-surface); font: inherit; color: var(--a-ink); }
 .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
 .doc-card { display: flex; flex-direction: column; background: var(--a-surface); border: 1px solid var(--a-border); border-radius: var(--a-r-lg); overflow: hidden; text-decoration: none !important; color: inherit !important; transition: border-color .16s, transform .16s, box-shadow .16s; }
 .doc-card:hover { transform: translateY(-2px); border-color: #b8b5aa; box-shadow: 0 10px 28px rgba(20,20,19,.06); }
@@ -227,6 +227,7 @@
 .admin input[type="text"], .admin input[type="email"], .admin input[type="number"], .admin input[type="password"], .admin input[type="datetime-local"], .admin input[type="search"], .admin input:not([type]), .admin select, .admin textarea {
   width: 100%; min-height: 38px; padding: 8px 12px; border: 1px solid var(--a-border-strong); border-radius: var(--a-r); background: var(--a-surface); color: var(--a-ink); font: inherit; transition: border-color .14s, box-shadow .14s;
 }
+.admin .search input[type="search"], .admin .search input { height: 36px; min-height: 36px; padding: 0 12px 0 36px; }
 .admin textarea { resize: vertical; }
 .admin input:focus, .admin select:focus, .admin textarea:focus { outline: none; border-color: var(--a-ink); box-shadow: 0 0 0 3px rgba(20,20,19,.08); }
 .field-hint, .field-error { margin: 0; font-size: 12.5px; }
