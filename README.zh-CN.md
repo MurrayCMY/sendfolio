@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/banner.svg" alt="SendFolio：看清谁读了你的文档，每一页都清清楚楚" width="100%">
+  <img src="docs/images/v0.3/banner.svg" alt="SendFolio：看清谁读了你的文档，每一页都清清楚楚" width="100%">
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 <br>
 
 <p align="center">
-  <img src="docs/images/overview-zh.png" alt="SendFolio 管理后台概览" width="100%">
+  <img src="docs/images/v0.3/overview-zh.png" alt="SendFolio 管理后台概览" width="100%">
   <br>
   <sub><b>概览</b> — 7 天阅读趋势、转发提醒、值得跟进的访客与近期动态，一目了然。</sub>
 </p>
@@ -105,13 +105,13 @@ SendFolio 为每位收件人生成**专属链接**，验证**对方邮箱**，�
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/reader.png" alt="带个人水印的黑曜石深色阅读页" width="100%">
+      <img src="docs/images/v0.3/reader.png" alt="带个人水印的黑曜石深色阅读页" width="100%">
       <br><br>
       <b>黑曜石画廊阅读器</b><br>
       <sub>中性深色画布让幻灯片成为视觉焦点，每一页自动叠加密封式个人水印与缩略图导航。</sub>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/analytics.png" alt="逐页停留时长与版本分析" width="100%">
+      <img src="docs/images/v0.3/analytics.png" alt="逐页停留时长与版本分析" width="100%">
       <br><br>
       <b>逐页停留分析与洞察</b><br>
       <sub>直观查看每页有效阅读时长与流失情况，悬停查看细分数据，并支持多版本横向对比。</sub>
@@ -119,13 +119,13 @@ SendFolio 为每位收件人生成**专属链接**，验证**对方邮箱**，�
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/links.png" alt="全局链接列表与转发监测" width="100%">
+      <img src="docs/images/v0.3/links.png" alt="全局链接列表与转发监测" width="100%">
       <br><br>
       <b>全局链接与转发监测</b><br>
       <sub>跨文档统一管理所有收件人链接，按状态快速筛选，自动标出被多人打开的疑似转发链接。</sub>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/visitor.png" alt="访客详情与跟进备注" width="100%">
+      <img src="docs/images/v0.3/visitor.png" alt="访客详情与跟进备注" width="100%">
       <br><br>
       <b>访客档案与跟进管理</b><br>
       <sub>集中查看 NDA 签署记录、累计有效阅读时长、私人跟进备注，以及跨文档的全部访问轨迹。</sub>
@@ -133,13 +133,13 @@ SendFolio 为每位收件人生成**专属链接**，验证**对方邮箱**，�
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/overview.png" alt="English admin interface" width="100%">
+      <img src="docs/images/v0.3/overview.png" alt="English admin interface" width="100%">
       <br><br>
       <b>完整中英双语界面</b><br>
       <sub>管理后台、阅读器、通知邮件与 NDA 签署回执均可一键切换中英文。</sub>
     </td>
     <td width="50%" valign="top" align="center">
-      <img src="docs/images/reader-mobile.png" alt="手机端阅读页" width="235">
+      <img src="docs/images/v0.3/reader-mobile.png" alt="手机端阅读页" width="235">
       <br><br>
       <b>移动端流畅阅读</b><br>
       <sub>手机端自适应竖向滚动，保留完整的个人水印保护与页码进度指示。</sub>

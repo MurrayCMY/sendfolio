@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/banner.svg" alt="SendFolio: see who reads your documents, page by page" width="100%">
+  <img src="docs/images/v0.3/banner.svg" alt="SendFolio: see who reads your documents, page by page" width="100%">
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 <br>
 
 <p align="center">
-  <img src="docs/images/overview.png" alt="SendFolio admin overview" width="100%">
+  <img src="docs/images/v0.3/overview.png" alt="SendFolio admin overview" width="100%">
   <br>
   <sub><b>Overview</b> — 7-day reading pulse, forwarding alerts, follow-up signals, and recent visits in one calm workspace.</sub>
 </p>
@@ -106,13 +106,13 @@ SendFolio gives each recipient **their own link**, verifies **their email**, opt
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/reader.png" alt="Obsidian gallery reader with personal watermark" width="100%">
+      <img src="docs/images/v0.3/reader.png" alt="Obsidian gallery reader with personal watermark" width="100%">
       <br><br>
       <b>Obsidian gallery reader</b><br>
       <sub>Slides take center stage on a neutral dark canvas, with a per-viewer watermark and page thumbnails.</sub>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/analytics.png" alt="Per-page reading analytics and drop-off insights" width="100%">
+      <img src="docs/images/v0.3/analytics.png" alt="Per-page reading analytics and drop-off insights" width="100%">
       <br><br>
       <b>Per-page analytics &amp; insights</b><br>
       <sub>See active reading time on every slide, hover for breakdowns, and compare across deck versions.</sub>
@@ -120,13 +120,13 @@ SendFolio gives each recipient **their own link**, verifies **their email**, opt
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/links.png" alt="Global links directory with forwarding detection" width="100%">
+      <img src="docs/images/v0.3/links.png" alt="Global links directory with forwarding detection" width="100%">
       <br><br>
       <b>Global links &amp; forwarding alerts</b><br>
       <sub>Manage every recipient link across documents, filter by status, and catch links opened by multiple people.</sub>
     </td>
     <td width="50%" valign="top">
-      <img src="docs/images/visitor.png" alt="Visitor profile with follow-up status and private notes" width="100%">
+      <img src="docs/images/v0.3/visitor.png" alt="Visitor profile with follow-up status and private notes" width="100%">
       <br><br>
       <b>Visitor profile &amp; follow-up</b><br>
       <sub>Track NDA status, total active reading time, private notes, and every visit across your documents.</sub>
@@ -134,13 +134,13 @@ SendFolio gives each recipient **their own link**, verifies **their email**, opt
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/images/overview-zh.png" alt="Simplified Chinese admin interface" width="100%">
+      <img src="docs/images/v0.3/overview-zh.png" alt="Simplified Chinese admin interface" width="100%">
       <br><br>
       <b>Full Chinese &amp; English UI</b><br>
       <sub>Switch languages in one click across the admin console, reader, emails, and NDA receipts.</sub>
     </td>
     <td width="50%" valign="top" align="center">
-      <img src="docs/images/reader-mobile.png" alt="Mobile reader view" width="235">
+      <img src="docs/images/v0.3/reader-mobile.png" alt="Mobile reader view" width="235">
       <br><br>
       <b>Built for phones</b><br>
       <sub>Responsive vertical scroll on mobile with the same watermark protection and page progress.</sub>
