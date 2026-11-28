@@ -8,12 +8,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MurrayCmy/sendfolio/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MurrayCmy/sendfolio/ci.yml?branch=main&style=flat-square&label=CI&labelColor=1a213d"></a>
-  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-3949ab?style=flat-square&labelColor=1a213d"></a>
-  <img alt="Node 22+" src="https://img.shields.io/badge/node-22%2B-3949ab?style=flat-square&labelColor=1a213d">
-  <img alt="Docker ready" src="https://img.shields.io/badge/docker-ready-3949ab?style=flat-square&labelColor=1a213d">
-  <img alt="English and Chinese" src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-3949ab?style=flat-square&labelColor=1a213d">
-  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-3949ab?style=flat-square&labelColor=1a213d"></a>
+  <a href="https://github.com/MurrayCMY/sendfolio/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MurrayCMY/sendfolio/ci.yml?branch=main&style=flat-square&label=CI&labelColor=141413"></a>
+  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-2f2e2b?style=flat-square&labelColor=141413"></a>
+  <img alt="Node 22+" src="https://img.shields.io/badge/node-22%2B-2f2e2b?style=flat-square&labelColor=141413">
+  <img alt="Docker ready" src="https://img.shields.io/badge/docker-ready-2f2e2b?style=flat-square&labelColor=141413">
+  <img alt="English and Chinese" src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-2f2e2b?style=flat-square&labelColor=141413">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-2f2e2b?style=flat-square&labelColor=141413"></a>
 </p>
 
 <p align="center">
@@ -51,44 +51,44 @@ document in the browser with **their name watermarked on every page**, and tells
 <table>
   <tr>
     <td width="33%" valign="top">
-      <h4>🔗 A link per person</h4>
-      Custom addresses like <code>/acme</code>, expiry dates, passwords. Disable or delete a link any time.
+      <h4>🔗 Links, presets &amp; bulk generator</h4>
+      Custom addresses like <code>/acme</code>, 1-click security presets, bulk link creation (up to 50 recipients at once), and instant visitor preview.
     </td>
     <td width="33%" valign="top">
-      <h4>📊 Page-by-page analytics</h4>
-      Time on every page, how far they got, a heat map across all readers, return visits and a live “reading now” marker.
+      <h4>📊 Page analytics &amp; version diff</h4>
+      Time on every page, drop-off insights, version-to-version comparison (<code>v1</code> vs <code>v2</code>), forwarding detection, and a live “reading now” marker.
     </td>
     <td width="33%" valign="top">
-      <h4>📬 Follow-up inbox</h4>
-      See who came back or read deeply, set a status (contacted, meeting, declined) and keep private notes.
+      <h4>📁 Data rooms &amp; follow-up inbox</h4>
+      Bundle multiple documents under one link and one NDA, track every visitor's status and private notes, and see who forwarded your deck.
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <h4>✉️ Verified access</h4>
-      Name + work email + a 6-digit code. Block personal domains or allow only specific companies.
+      <h4>✉️ Verified access &amp; team admins</h4>
+      Name + work email + 6-digit code, domain allowlists, visual personal-email blocklist, and multi-admin access for co-founders.
     </td>
     <td valign="top">
       <h4>📝 NDA with e-signature</h4>
       Readers accept your NDA first. Each acceptance becomes a PDF with time, IP and a hash of the exact text, emailed to the signer.
     </td>
     <td valign="top">
-      <h4>💧 Dynamic watermark</h4>
-      Name, email, IP and time burned into every page (and downloaded PDFs). You choose the fields.
+      <h4>💧 Dynamic watermark &amp; dark reader</h4>
+      Obsidian gallery reader with name, email, IP and date baked into every page (and downloaded PDFs), plus an optional booking button.
     </td>
   </tr>
   <tr>
     <td valign="top">
-      <h4>🖼️ Images, not PDFs</h4>
-      Pages are served as images with a tamper guard. Optional watermarked PDF download.
+      <h4>🎨 In-app branding</h4>
+      Upload your logo, pick your brand colour, and add a “Book a call” button in the reader—all from Settings without touching code.
     </td>
     <td valign="top">
-      <h4>🔔 Notifications</h4>
-      An email when someone opens a link, and a reading summary with their top pages when they finish.
+      <h4>🔔 Email, Slack &amp; Feishu / Lark alerts</h4>
+      Real-time alerts when someone opens or forwards a link, plus reading summaries—with built-in 3-step setup guides.
     </td>
     <td valign="top">
-      <h4>🌍 English &amp; 简体中文</h4>
-      Admin, reader, emails and PDFs in both languages. Adding another is one file.
+      <h4>🌍 English &amp; 简体中文 · S3 ready</h4>
+      Full bilingual UI, emails and PDFs, with local disk, Netlify Blobs, or S3-compatible storage (Cloudflare R2, AWS S3, Aliyun OSS, MinIO).
     </td>
   </tr>
 </table>
@@ -194,7 +194,7 @@ Everything is an environment variable; [`.env.example`](.env.example) documents 
 
 | Variable | What it does |
 |---|---|
-| `ADMIN_EMAIL` | The only address that can sign in to `/admin` |
+| `ADMIN_EMAIL` | Primary admin address (add co-founders in **Settings → Team** or comma-separate in `.env`) |
 | `SITE_URL` | Your public address, e.g. `https://docs.yourcompany.com` |
 | `SESSION_SECRET` | 32+ random characters (`npm run init` creates it) |
 | `SMTP_HOST` `SMTP_USER` `SMTP_PASS` `MAIL_FROM` | Sending email |
@@ -209,7 +209,7 @@ Full reference: [docs/configuration.md](docs/configuration.md) · Make it yours 
 ## 🔒 Privacy and security
 
 - Recipients are told what is recorded: name, email, time, IP address, device and time per page.
-- Signed HttpOnly cookies, rate-limited login codes, one admin address, no third-party scripts or fonts.
+- Signed HttpOnly cookies, rate-limited login codes, explicit admin allowlist, no third-party scripts or fonts.
 - A watermark deters leaks and lets you trace them; **it cannot stop someone photographing a screen**. Details in [SECURITY.md](SECURITY.md).
 
 > [!IMPORTANT]
@@ -217,15 +217,15 @@ Full reference: [docs/configuration.md](docs/configuration.md) · Make it yours 
 
 ## 🗺️ Status and roadmap
 
-SendFolio is at **v0.2**. Docker Compose, plain Node and PostgreSQL are tested in CI on every commit.
+SendFolio is at **v0.3**. Docker Compose, plain Node and PostgreSQL are tested in CI on every commit.
 
 - [x] Docker, Netlify and plain Node deployment · English and Chinese · NDA e-signature · watermarks · follow-up notes
-- [x] Dark-gallery reader · drag-and-drop upload · link presets · bulk link generator · 1-click preview as visitor
+- [x] Warm Paper & Obsidian Ink visual system · dark gallery reader · drag-and-drop upload · link presets · bulk link generator · 1-click preview as visitor
 - [x] In-app branding & reader action button · forwarding detection · version-to-version analytics comparison
 - [x] S3-compatible file storage (Cloudflare R2, AWS S3, Aliyun OSS, MinIO)
 - [x] Team / co-founder admin access
 - [x] Data rooms: several documents per link under one NDA
-- [x] Real-time alerts: Slack, Feishu / Lark and generic webhooks
+- [x] Real-time alerts: Slack, Feishu / Lark and generic webhooks with step-by-step setup guides
 - [ ] More languages
 
 Ideas and pull requests are welcome: [CONTRIBUTING.md](CONTRIBUTING.md).

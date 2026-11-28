@@ -22,7 +22,7 @@ Database: PostgreSQL, or embedded PGlite when no `DATABASE_URL` is set. Files: l
 ## Questions to ask before deploying
 
 - Which target? (Docker on a server, Netlify, Railway/Render/Fly, or just run it locally.)
-- Admin email: the only address that may sign in to `/admin`.
+- Admin email: the primary address that may sign in to `/admin` (more admins can be added later in **Settings → Team**).
 - Public address, e.g. `https://docs.example.com` (and, for a server, can they point a DNS A record at it?).
 - Email (SMTP) provider and credentials. Without SMTP everything works but emails are printed in the server log; visitors cannot receive codes, so it is only fine for a trial. Suggest Resend or Gmail (app password) for the quickest path.
 - Language (`en` or `zh`) and time zone (e.g. `UTC`, `America/New_York`, `Asia/Shanghai`).

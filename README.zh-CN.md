@@ -8,12 +8,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MurrayCmy/sendfolio/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MurrayCmy/sendfolio/ci.yml?branch=main&style=flat-square&label=CI&labelColor=1a213d"></a>
-  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-3949ab?style=flat-square&labelColor=1a213d"></a>
-  <img alt="Node 22+" src="https://img.shields.io/badge/node-22%2B-3949ab?style=flat-square&labelColor=1a213d">
-  <img alt="Docker ready" src="https://img.shields.io/badge/docker-ready-3949ab?style=flat-square&labelColor=1a213d">
-  <img alt="English and Chinese" src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-3949ab?style=flat-square&labelColor=1a213d">
-  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-3949ab?style=flat-square&labelColor=1a213d"></a>
+  <a href="https://github.com/MurrayCMY/sendfolio/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/MurrayCMY/sendfolio/ci.yml?branch=main&style=flat-square&label=CI&labelColor=141413"></a>
+  <a href="LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/license-Apache%202.0-2f2e2b?style=flat-square&labelColor=141413"></a>
+  <img alt="Node 22+" src="https://img.shields.io/badge/node-22%2B-2f2e2b?style=flat-square&labelColor=141413">
+  <img alt="Docker ready" src="https://img.shields.io/badge/docker-ready-2f2e2b?style=flat-square&labelColor=141413">
+  <img alt="English and Chinese" src="https://img.shields.io/badge/lang-EN%20%7C%20%E4%B8%AD%E6%96%87-2f2e2b?style=flat-square&labelColor=141413">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-2f2e2b?style=flat-square&labelColor=141413"></a>
 </p>
 
 <p align="center">
@@ -214,15 +214,15 @@ flowchart LR
 
 ## 🗺️ 状态与路线图
 
-SendFolio 当前版本为 **v0.2**。Docker Compose、直接用 Node 和 PostgreSQL 都在每次提交的 CI 里测试。
+SendFolio 当前版本为 **v0.3**。Docker Compose、直接用 Node 和 PostgreSQL 都在每次提交的 CI 里测试。
 
 - [x] Docker、Netlify 和直接用 Node 部署 · 中英双语 · NDA 电子签署 · 水印 · 跟进备注
-- [x] 深色画廊阅读器 · 拖拽上传 · 安全预设 · 批量生成链接 · 一键以访客视角预览
-- [x] 后台自定义品牌与阅读页行动按钮 · 转发监测提醒 · 多版本阅读数据对比
+- [x] 暖纸黑墨极简设计 · 黑曜石画廊阅读器 · 拖拽上传 · 安全预设 · 批量生成链接 · 一键以访客视角预览
+- [x] 后台自定义品牌与阅读页预约按钮 · 转发监测提醒 · 多版本阅读数据对比
 - [x] 兼容 S3 的对象存储（Cloudflare R2、AWS S3、阿里云 OSS、MinIO）
 - [x] 团队 / 联合创始人多管理员权限
 - [x] 数据室：一条链接、一份 NDA 分享整套资料
-- [x] 实时推送提醒：Slack、飞书 / Lark 与通用 Webhook
+- [x] 实时推送提醒：Slack、飞书 / Lark 与通用 Webhook（附三步配置指引）
 - [ ] 更多语言
 
 欢迎提想法和 PR：[CONTRIBUTING.md](CONTRIBUTING.md)。

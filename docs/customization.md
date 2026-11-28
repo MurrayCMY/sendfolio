@@ -1,29 +1,18 @@
 # Customization
 
-## Your name
+## Branding, logo, colours & reader button (no code needed)
 
-Set `APP_NAME` (and `COMPANY_NAME` for the legal/display name in the NDA and emails). It appears in the sidebar, the reader header, emails,
-page titles and the NDA PDF footer. No code changes needed.
+Open **Admin → Settings → Branding** to set your workspace name, upload a custom logo (PNG/SVG/WebP under 100 KB), pick a brand colour, and add an optional action button (e.g. "Book a call" → Calendly / Cal.com) to the investor reader header.
 
-## Logo and favicon
-
-- The mark is `src/ui/Logo.tsx` (an inline SVG that follows the text colour). Replace its paths, or return an `<img>` instead.
-- The browser icon is `public/favicon.svg`.
-
-## Colours
-
-The web UI colours are CSS variables at the top of two files:
-
-- `src/styles.css` → `:root { --primary, --dark, --tint, --bg ... }` (reader and sign-in pages)
-- `src/admin/admin.css` → `.admin { --a-primary, --a-ink, --a-tint ... }` (admin area)
-
-Change the values, then `npm run build`. Keep text/background pairs at a contrast ratio of 4.5:1 or better.
-Email accent colour: `BRAND_COLOR`.
+For environment defaults or deeper styling:
+- Set `APP_NAME`, `COMPANY_NAME`, and `BRAND_COLOR` in `.env`.
+- Browser favicon: `public/favicon.svg`.
+- Full CSS tokens: `src/styles.css` (`:root`) and `src/admin/admin.css` (`.admin`).
 
 ## The NDA
 
 The first time an NDA is needed, a **sample template** is installed (`server/lib/nda-default.ts`). It is a generic one-way agreement and
-**not legal advice**. Replace it with your own text in **Admin → NDA & settings → NDA versions → Upload new version**.
+**not legal advice**. Replace it with your own text in **Admin → Settings → NDA → New NDA version**.
 
 - Provide an English and a Chinese text (if you only need one language, paste the same text in both).
 - Paragraphs are separated by blank lines; `**bold**` is supported.
